@@ -1,0 +1,103 @@
+{
+    "ordererAddress": "0.0.0.0",
+    "ordererPort": "7050",
+    "couchdbAddress": "0.0.0.0",
+    "couchdbPort": "5984",
+    "vp0Address": "0.0.0.0",
+    "vp0Port": "7061",
+    "evtAddress": "0.0.0.0",
+    "evtPort": "9061",
+    "version": "2",
+    "networks":
+            "bridge",
+    "services": {
+        "orderer": {
+            "image": "hyperledger/fabric-orderer",
+            "environment": {
+                "ORDERER_GENERAL_LOGLEVEL": "debug",
+                "ORDERER_GENERAL_LISTENADDRESS": "0.0.0.0",
+                "ORDERER_GENERAL_GENESISMETHOD": "file",
+                "ORDERER_GENERAL_GENESISFILE": "/var/hyperledger/orderer/orderer.block",
+                "ORDERER_GENERAL_LOCALMSPID": "OrdererMSP",
+                "ORDERER_GENERAL_LOCALMSPDIR": "/var/hyperledger/orderer/localMspConfig"
+            },
+            "working_dir": "/opt/gopath/src/github.com/hyperledger/fabric",
+            "command": "orderer",
+            "volume": [
+                 "./crypto/orderer:/var/hyperledger/orderer"
+            ],
+            "ports": [
+                 "7050:7050"
+            ],
+            "container_name": "orderer",
+            "networks": [
+                 "bridge"
+            ]
+        },
+        "peer": {
+            "extends": [
+                  "file: peer-base/peer-base.yaml",
+                  "service: peer-base"
+            ],
+            "environment": {
+                 "CORE_PEER_ID": "peer",
+                 "CORE_PEER_GOSSIP_BOOTSTRAP": "peer0:5005",
+                 "CORE_PEER_COMMITTER_LEDGER_ORDERER": "orderer:5005",
+                 "CORE_PEER_MSPCONFIGPATH": "/var/hyperledger/msp/peer0/localMspConfig",
+                 "CORE_PEER_LOCALMSPID": "Org0MSP"
+            },
+            "volumes": [
+                  "/var/run/:/host/var/run/",
+                  "./crypto/peer/:/var/hyperledger/msp/",
+                  "./examples/:/opt/gopath/src/github.com/hyperledger/fabric/examples/"
+            ],
+            "ports": [
+                  "PORTID:7051"
+            ],
+            "depends_on": [
+                  "orderer"
+            ],
+            "container_name": "vpID",
+            "networks": [
+                 "bridge"
+            ]
+        },
+        "cli": {
+            "container_name": "cli",
+            "image": "hyperledger/fabric-peer",
+            "tty": "true",
+            "environment": {
+                  "GOPATH":"/opt/gopath",
+                  "CORE_PEER_ADDRESSAUTODETECT":"true",
+                  "CORE_VM_ENDPOINT":"unix:///host/var/run/docker.sock",
+                  "CORE_LOGGING_LEVEL":"DEBUG",
+                  "CORE_NEXT":"true",
+                  "CORE_PEER_ID":"cli",
+                  "CORE_PEER_ENDORSER_ENABLED":"true",
+                  "CORE_PEER_COMMITTER_LEDGER_ORDERER":"orderer:5005",
+                  "CORE_PEER_ADDRESS":"peer0:7051",
+                  "CORE_PEER_GOSSIP_IGNORESECURITY":"true",
+                  "CORE_PEER_LOCALMSPID":"Org0MSP",
+                  "CORE_PEER_MSPCONFIGPATH":"/opt/gopath/src/github.com/hyperledger/fabric/msp/sampleconfig"
+            },
+            "working_dir": "/opt/gopath/src/github.com/hyperledger/fabric/peer",
+            "command": "sh -c './script.sh | tee  results.log 2>&1; sleep 100000'",
+            "volumes": [
+                    "/var/run/:/host/var/run/",
+                    "./examples/:/opt/gopath/src/github.com/hyperledger/fabric/examples/",
+                    "./crypto/orderer/channel.tx:/opt/gopath/src/github.com/hyperledger/fabric/peer/channel.tx",
+                    "./crypto/peer/peer0/localMspConfig:/opt/gopath/src/github.com/hyperledger/fabric/msp/sampleconfig",
+                    "./crypto:/opt/gopath/src/github.com/hyperledger/fabric/examples/e2e/crypto/",
+                    "./script.sh:/opt/gopath/src/github.com/hyperledger/fabric/peer/script.sh",
+                    "./results.log:/opt/gopath/src/github.com/hyperledger/fabric/peer/results.log"
+            ],
+            "depends_on": [
+                  "orderer0",
+                  "peer0"
+            ],
+            "networks": [
+                  "bridge"
+            ]
+        }
+    }
+}
