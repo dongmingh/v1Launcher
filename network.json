@@ -11,6 +11,28 @@
     "networks":
             "bridge",
     "services": {
+        "zookeeper": {
+            "image": "hyperledger/fabric-zookeeper",
+            "container_name": "zookeeper",
+            "networks": [
+                 "bridge"
+            ]
+        },
+        "kafka": {
+            "image": "hyperledger/fabric-kafka",
+            "environment": {
+                 "KAFKA_BROKER_ID": "0",
+                 "KAFKA_ZOOKEEPER_CONNECT": "zookeeper:2181",
+                 "KAFKA_DEFAULT_REPLICATION_FACTOR": "3"
+            },
+            "depends_on": [
+                 "zookeeper"
+            ],
+            "container_name": "kafka0",
+            "networks": [
+                 "bridge"
+            ]
+        },
         "orderer": {
             "image": "hyperledger/fabric-orderer",
             "environment": {
