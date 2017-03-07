@@ -19,9 +19,12 @@ function printHelp {
    echo "    -s: security type, default=256"
    echo "    -t: ledger orderer service type [solo|kafka], default=solo"
    echo "    -c: crypto directory, default=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen"
+   echo "    -x: host ip 1, default=0.0.0.0"
+   echo "    -y: host ip 2, default=0.0.0.0"
+   echo "    -z: host port, default=7050"
    echo " "
    echo " example: "
-   echo " ./NetworkLauncher.sh -o 1 -r 2 -p 3 -k 1 -t kafka -f testOrg -c . "
+   echo " ./NetworkLauncher.sh -o 1 -r 2 -p 3 -k 1 -t kafka -f testOrg -w 9.47.152.126 -x 9.47.152.125 -y 9.47.152.124 -z 20000 "
    exit
 }
 
@@ -38,7 +41,7 @@ secType="256"
 CryptoBaseDir=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen
 
 
-while getopts ":d:f:h:k:o:p:r:t:s:c:" opt; do
+while getopts ":d:f:h:k:o:p:r:t:s:c:w:x:y:z:" opt; do
   case $opt in
     # peer environment options
     d)
@@ -91,6 +94,29 @@ while getopts ":d:f:h:k:o:p:r:t:s:c:" opt; do
       echo "CryptoBaseDir: $CryptoBaseDir"
       ;;
 
+    w)
+      HostIP1=$OPTARG
+      KafkaAIP=$OPTARG
+      echo "HostIP1:  $HostIP1"
+      ;;
+
+    x)
+      KafkaBIP=$OPTARG
+      echo "KafkaIP:  $KafkaIP"
+      ;;
+
+    y)
+      HostIP2=$OPTARG
+      KafkaCIP=$OPTARG
+      echo "HostIP2:  $HostIP2"
+      ;;
+
+    z)
+      BasePort=$OPTARG
+      echo "BasePort: $BasePort, HostPort: $HostPort, OrdererPort: $OrdererPort, KafkaPort: $KafkaPort"
+      ;;
+
+
     # else
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -134,7 +160,7 @@ echo "current working directory: $PWD"
 #cd $CFGGenDir
 
 echo "./driver_cfgtx.sh -o $nOrderer -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $PROFILE_STRING"
-./driver_cfgtx.sh -o $nOrderer -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $PROFILE_STRING
+./driver_cfgtx.sh -o $nOrderer -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $PROFILE_STRING -w $KafkaAIP -x $KafkaBIP -y $KafkaCIP -z $BasePort
 
 
 # network gen ..................

@@ -132,6 +132,7 @@ done
 echo "nOrderer=$nOrderer, peersPerOrg=$peersPerOrg, ordServType=$ordServType, nOrg=$nOrg, hashType=$hashType, SecType=$SecType"
 echo "MSPBaseDir=$MSPBaseDir"
 echo "Host IP=$HostIP1, $HostIP2, Port=$HostPort"
+echo "Kafka IP=$KafkaAIP, $KafkaBIP, $KafkaCIP"
 echo "inFile=$inFile"
 echo "cfgOutFile=$cfgOutFile"
 
