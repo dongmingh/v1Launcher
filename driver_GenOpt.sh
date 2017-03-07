@@ -7,7 +7,31 @@
 #
 
 
-InvalidArgs=0
+
+function printHelp {
+   echo "Usage: "
+   echo " ./driver_ord.sh [opt] [value] "
+   echo "    network variables"
+   echo "       -a: action [create|add] "
+   echo "       -p: number of peers "
+   echo "       -o: number of orderers "
+   echo "       -k: number of brokers "
+   echo "       -F: MSP base directory "
+   echo " "
+   echo "    peer environment variables"
+   echo "       -l: core logging level [(default = not set)|CRITICAL|ERROR|WARNING|NOTICE|INFO|DEBUG]"
+   echo "       -d: core ledger state DB [goleveldb|couchdb] "
+   echo " "
+   echo "    orderer environment variables"
+   echo "       -b: batch size [10|msgs in batch/block]"
+   echo "       -t: orderer type [solo|kafka] "
+   echo "       -c: batch timeout [10s|max secs before send an unfilled batch] "
+   echo " "
+   echo "Example:"
+   echo "   ./driver_GenOpt.sh -p 4 -o 1 -k 1 -t kafka -d goleveldb -F crypto-config"
+   echo " "
+   exit
+}
 
 #init var
 nBroker=0
@@ -72,36 +96,15 @@ while getopts ":l:d:b:c:t:a:o:k:p:F:" opt; do
     # else
     \?)
       echo "Invalid option: -$OPTARG" >&2
-      InvalidArgs=1
+      printHelp
       ;;
     :)
       echo "Option -$OPTARG requires an argument." >&2
-      InvalidArgs=1
+      printHelp
       ;;
   esac
 done
 
-
-if [ $InvalidArgs == 1 ]; then
-   echo "Usage: "
-   echo " ./driver_ord.sh [opt] [value] "
-   echo "    network variables"
-   echo "    -a: action [create|add] "
-   echo "    -p: number of peers "
-   echo "    -o: number of orderers "
-   echo "    -k: number of brokers "
-   echo " "
-   echo "    peer environment variables"
-   echo "    -l: core logging level [(default = not set)|CRITICAL|ERROR|WARNING|NOTICE|INFO|DEBUG]"
-   echo "    -d: core ledger state DB [goleveldb|couchdb] "
-   echo " "
-   echo "    orderer environment variables"
-   echo "    -b: batch size [10|msgs in batch/block]"
-   echo "    -t: orderer type [solo|kafka] "
-   echo "    -c: batch timeout [10s|max secs before send an unfilled batch] "
-   echo " "
-   exit
-fi
 
 if [ $nBroker -gt 0 ] && [ $ORDERER_GENESIS_ORDERERTYPE == 'solo' ]; then
     echo "reset Broker number to 0 due to the ORDERER_GENESIS_ORDERERTYPE=$ORDERER_GENESIS_ORDERERTYPE"

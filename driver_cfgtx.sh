@@ -3,30 +3,30 @@
 #
 # usage: ./driver_cfgtx.sh [opt] [value]
 # example:
-#    ./driver_cfgtx.sh -o 2 -p 3 -r 2 -h SHA2 -s 256 -t kafka -b /mnt/crypto-config -x 9.47.152.126 -y 9.47.152.124 -z 20021
+#    ./driver_cfgtx.sh -o 1 -p 2 -r 6 -h SHA2 -s 256 -t kafka -b /mnt/crypto-config -w 9.47.152.126 -x 9.47.152.125 -y 9.47.152.124 -z 20000
 #
 
 HostIP1="0.0.0.0"
 HostIP2="0.0.0.0"
 HostPort=7050
 
-function cfgHelp {
+function printHelp {
    echo "Usage: "
    echo " ./driver_cfgtx.sh [opt] [value] "
-   echo "    -o: number of orderers (optional)"
-   echo "    -p: number of peers per organiztion (required)"
-   echo "    -h: hash type"
-   echo "    -r: number of organization (required)"
-   echo "    -s: security service type"
-   echo "    -t: orderer service [solo|kafka] (optional)"
-   echo "    -f: profile name"
+   echo "    -o: number of orderers, default=1"
+   echo "    -p: number of peers per organiztion, default=1"
+   echo "    -h: hash type, default=SHA2"
+   echo "    -r: number of organization, default=1"
+   echo "    -s: security service type, default=256"
+   echo "    -t: orderer service [solo|kafka], default=solo"
+   echo "    -f: profile name, default=testOrg"
    echo "    -b: MSP directory, default=/mnt/crypto-config"
    echo "    -x: host ip 1, default=0.0.0.0"
    echo "    -y: host ip 2, default=0.0.0.0"
    echo "    -z: host port, default=7050"
    echo " "
    echo "Example:"
-   echo " ./driver_cfgtx.sh -o 1 -p 2 -r 6 -h SHA2 -s 256 -t kafka -b /mnt/crypto-config -x 9.47.152.126 -y 9.47.152.124 -z 20021"
+   echo " ./driver_cfgtx.sh -o 1 -p 2 -r 6 -h SHA2 -s 256 -t kafka -b /mnt/crypto-config -w 9.47.152.126 -x 9.47.152.125 -y 9.47.152.124 -z 20000"
    exit
 }
 
@@ -45,7 +45,7 @@ SecType="256"
 PROFILE_STRING="testOrg"
 MSPBaseDir="/mnt/crypto-config/"
 
-while getopts ":o:p:s:h:r:t:f:b:x:y:z:" opt; do
+while getopts ":o:p:s:h:r:t:f:b:w:x:y:z:" opt; do
   case $opt in
     # number of orderers
     o)
@@ -90,29 +90,40 @@ while getopts ":o:p:s:h:r:t:f:b:x:y:z:" opt; do
       echo "MSPBaseDir:  $MSPBaseDir"
       ;;
 
-    x)
+    w)
       HostIP1=$OPTARG
+      KafkaAIP=$OPTARG
       echo "HostIP1:  $HostIP1"
+      ;;
+
+    x)
+      KafkaBIP=$OPTARG
+      echo "KafkaIP:  $KafkaIP"
       ;;
 
     y)
       HostIP2=$OPTARG
+      OrdererIP=$OPTARG
+      KafkaCIP=$OPTARG
       echo "HostIP2:  $HostIP2"
       ;;
 
     z)
-      HostPort=$OPTARG
-      echo "HostPort:  $HostPort"
+      BasePort=$OPTARG
+      HostPort=$[ BasePort + 21 ]
+      OrdererPort=$[ BasePort + 5 ]
+      KafkaPort=$[ BasePort + 3 ]
+      echo "BasePort: $BasePort, HostPort: $HostPort, OrdererPort: $OrdererPort, KafkaPort: $KafkaPort"
       ;;
 
     # else
     \?)
       echo "Invalid option: -$OPTARG" >&2
-      cfgHelp
+      printHelp
       ;;
     :)
       echo "Option -$OPTARG requires an argument." >&2
-      cfgHelp
+      printHelp
       ;;
   esac
 done
@@ -146,6 +157,12 @@ do
 
       elif [ "$t1" == "&ProfileString" ]; then
           echo "    $PROFILE_STRING:" >> $cfgOutFile
+
+      elif [ "$t1" == "Brokers:" ]; then
+          echo "        $t1" >> $cfgOutFile
+          echo "             - $KafkaAIP":"$KafkaPort" >> $cfgOutFile
+          echo "             - $KafkaBIP":"$KafkaPort" >> $cfgOutFile
+          echo "             - $KafkaCIP":"$KafkaPort" >> $cfgOutFile
 
       elif [ "$t2" == "&OrdererOrg" ]; then
           echo "OrdererOrg ... "

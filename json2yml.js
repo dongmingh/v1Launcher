@@ -537,7 +537,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                         }
                                     } else if ( lvl3_key[m] == 'CORE_PEER_LOCALMSPID' ) {
                                         var t = (v - v%2)/2 + 1;
-                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + 'Org'+t+'MSP' + '\n';
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + 'Peer'+t+'MSP' + '\n';
                                             fs.appendFileSync(dFile, buff);
                                     } else if ( lvl3_key[m] == 'CORE_PEER_MSPCONFIGPATH' ) {
                                             var t = (v - v%2)/2 + 1;

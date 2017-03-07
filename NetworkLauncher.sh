@@ -1,7 +1,6 @@
 #!/bin/bash
 
 #
-# usage: ./driver_GenOpt.sh [opt] [value]
 # example:
 #    ./NetworkLauncher.sh -o 1 -r 2 -p 3 -f testOrg -k 1 -t kafka -d goleveldb -c .
 #
@@ -22,7 +21,7 @@ function printHelp {
    echo "    -c: crypto directory, default=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen"
    echo " "
    echo " example: "
-   echo " ./NetworkLauncher.sh -o 1 -r 2 -p 3 -k 1 -f testOrg -c . "
+   echo " ./NetworkLauncher.sh -o 1 -r 2 -p 3 -k 1 -t kafka -f testOrg -c . "
    exit
 }
 
@@ -115,29 +114,34 @@ CWD=$PWD
 echo "current working directory: $CWD"
 echo "GOPATH=$GOPATH"
 
-# crypto
+# cryptogen ..................
 echo "generate crypto ..."
-#echo "current working directory: $PWD"
+cd $CryptoBaseDir
+echo "current working directory: $PWD"
 go build
+cd $CWD
+echo "current working directory: $PWD"
 
-CRYPTOEXE=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/cryptogen
+CRYPTOEXE=$CryptoBaseDir/cryptogen
 $CRYPTOEXE -baseDir $CryptoBaseDir -ordererNodes $nOrderer -peerOrgs $nOrg -peersPerOrg $nPeersPerOrg
 
 
-# configtx
+# configtx ..................
 echo "generate configtx.yml ..."
 cd $CWD
 echo "current working directory: $PWD"
+#CFGGenDir=$GOPATH/src/github.com/hyperledger/fabric/common/configtx/tool/configtxgen
+#cd $CFGGenDir
 
 echo "./driver_cfgtx.sh -o $nOrderer -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $PROFILE_STRING"
 ./driver_cfgtx.sh -o $nOrderer -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $PROFILE_STRING
 
 
+# network gen ..................
 echo "generate docker-compose.yml ..."
 echo "current working directory: $PWD"
 nPeers=$[ nPeersPerOrg * nOrg ]
 echo "number of peers: $nPeers"
-echo "./driver_GenOpt.sh -p $nPeers -o $nOrderer -k $nKafka -t $ordServType -d $ledgerDB"
 cryptoDir="crypto-config"
 echo "./driver_GenOpt.sh -a create -p $nPeers -o $nOrderer -k $nKafka -t $ordServType -d $ordServType -F $cryptoDir"
 ./driver_GenOpt.sh -a create -p $nPeers -o $nOrderer -k $nKafka -t $ordServType -d $ordServType -F $cryptoDir
