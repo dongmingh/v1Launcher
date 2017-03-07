@@ -12,6 +12,16 @@ var KAFKA=0;
 // Orderer environment var
 var ord_env_name=[];
 var ord_env_val=[];
+var msp_env_name=[];
+var msp_env_val=[];
+if ( process.env.LOCALMSPDIR != null ) {
+    console.log(' LOCALMSPDIR= ', process.env.LOCALMSPDIR);
+    msp_env_name.push('LOCALMSPDIR');
+    msp_env_val.push(process.env.LOCALMSPDIR);
+}
+console.log('msp_env_name: ', msp_env_name.length, msp_env_name);
+console.log('msp_env_val: ', msp_env_val.length, msp_env_val);
+
 if ( process.env.ORDERER_GENESIS_BATCHSIZE_MAXMESSAGECOUNT != null ) {
     console.log(' ORDERER_GENESIS_BATCHSIZE_MAXMESSAGECOUNT= ', process.env.ORDERER_GENESIS_BATCHSIZE_MAXMESSAGECOUNT);
     ord_env_name.push('ORDERER_GENESIS_BATCHSIZE_MAXMESSAGECOUNT');
@@ -304,10 +314,16 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                             fs.appendFileSync(dFile, buff);
                                         }
                                     } else if ( lvl3_key[m] == 'ORDERER_GENERAL_GENESISFILE' ) {
-                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + '/var/hyperledger/orderer'+0+'/orderer.block' + '\n';
+                                            var t = v+1;
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + '../common/tools/cryptogen/'+msp_env_val[0]+ '/ordererOrganizations/ordererOrg' +t+'/orderer.block' + '\n';
+                                            fs.appendFileSync(dFile, buff);
+                                    } else if ( lvl3_key[m] == 'ORDERER_GENERAL_LOCALMSPID' ) {
+                                            var t = v+1;
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + 'Orderer' +t+'MSP' + '\n';
                                             fs.appendFileSync(dFile, buff);
                                     } else if ( lvl3_key[m] == 'ORDERER_GENERAL_LOCALMSPDIR' ) {
-                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + '/var/hyperledger/orderer'+0+'/localMspConfig' + '\n';
+                                            var t = v+1;
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + '../common/tools/cryptogen/'+msp_env_val[0]+ '/ordererOrganizations/ordererOrg' +t+'/msp' + '\n';
                                             fs.appendFileSync(dFile, buff);
                                     } else {
                                         buff = '  ' + '    - ' + lvl3_key[m] + '=' +lvl2_obj[lvl3_key[m]] + '\n';
@@ -520,11 +536,12 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                             fs.appendFileSync(dFile, buff);
                                         }
                                     } else if ( lvl3_key[m] == 'CORE_PEER_LOCALMSPID' ) {
-                                        var t = (v - v%2)/2;
+                                        var t = (v - v%2)/2 + 1;
                                             buff = '  ' + '    - ' + lvl3_key[m] + '=' + 'Org'+t+'MSP' + '\n';
                                             fs.appendFileSync(dFile, buff);
                                     } else if ( lvl3_key[m] == 'CORE_PEER_MSPCONFIGPATH' ) {
-                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + '/var/hyperledger/msp/peer'+v +'/localMspConfig' + '\n';
+                                            var t = (v - v%2)/2 + 1;
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + '../common/tools/cryptogen/'+msp_env_val[0]+'/peerOrganizations/peerOrg'+t +'/msp' + '\n';
                                             fs.appendFileSync(dFile, buff);
                                     } else {
                                         buff = '  ' + '    - ' + lvl3_key[m] + '=' +lvl2_obj[lvl3_key[m]] + '\n';
@@ -579,7 +596,19 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                 fs.appendFileSync(dFile, buff);
                             }
 
-                        } else if ( ( lvl2_key[k] == 'volumes' ) || ( lvl2_key[k] == 'extends' ) ) {
+                        } else if ( lvl2_key[k] == 'extends' ) {
+                            var lvl2_obj = lvl1_obj[lvl2_key[k]];
+
+                            buff = '  ' + '  ' + lvl2_key[k] + ': ' + '\n';
+                            fs.appendFileSync(dFile, buff);
+
+                            // header 4
+                            for ( m=0; m< lvl2_obj.length; m++ ) {
+                                buff = '  ' + '      ' +lvl2_obj[m] + '\n';
+                                fs.appendFileSync(dFile, buff);
+
+                            }
+                        } else if ( lvl2_key[k] == 'volumes' ) {
                             var lvl2_obj = lvl1_obj[lvl2_key[k]];
 
                             buff = '  ' + '  ' + lvl2_key[k] + ': ' + '\n';

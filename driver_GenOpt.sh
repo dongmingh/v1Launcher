@@ -13,7 +13,7 @@ InvalidArgs=0
 nBroker=0
 nPeer=1
 
-while getopts ":l:d:b:c:t:a:o:k:p:" opt; do
+while getopts ":l:d:b:c:t:a:o:k:p:F:" opt; do
   case $opt in
     # peer environment options
     l)
@@ -37,11 +37,16 @@ while getopts ":l:d:b:c:t:a:o:k:p:" opt; do
       export ORDERER_GENESIS_BATCHTIMEOUT=$ORDERER_GENESIS_BATCHTIMEOUT
       echo "ORDERER_GENESIS_BATCHTIMEOUT: $ORDERER_GENESIS_BATCHTIMEOUT"
       ;;
+    F)
+      LOCALMSPDIR=$OPTARG
+      export LOCALMSPDIR=$LOCALMSPDIR
+      echo "LOCALMSPDIR: $LOCALMSPDIR"
+      ;;
     t)
       ORDERER_GENESIS_ORDERERTYPE=$OPTARG
       export ORDERER_GENESIS_ORDERERTYPE=$ORDERER_GENESIS_ORDERERTYPE
       echo "ORDERER_GENESIS_ORDERERTYPE: $ORDERER_GENESIS_ORDERERTYPE"
-      if [$nBroker == 0 ] && [ $ORDERER_GENESIS_ORDERERTYPE == 'kafka' ]; then
+      if [ $nBroker == 0 ] && [ $ORDERER_GENESIS_ORDERERTYPE == 'kafka' ]; then
           nBroker=1   # must have at least 1
       fi
       ;;
@@ -145,7 +150,6 @@ fi
 
 node json2yml.js $jsonFILE $N1 $nOrderer $nBroker $dbType
 # exit ......
-exit
 
 ## sed 's/-x86_64/TEST/g' docker-compose.yml > ss.yml
 ## cp ss.yml docker-compose.yml

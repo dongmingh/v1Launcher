@@ -11,7 +11,7 @@ Profiles:
 
     # SampleSingleMSPSolo defines a configuration which contains a single MSP
     # definition (the MSP sampleconfig).
-    TwoOrgs:
+    &ProfileString
         Orderer:
             <<: *OrdererDefaults
             Organizations:
@@ -20,6 +20,15 @@ Profiles:
             <<: *ApplicationDefaults
             Organizations:
                 - *Org0
+
+    # SampleInsecureKafka defines a configuration that differs from the
+    # SampleInsecureSolo one only in that is uses the Kafka-based orderer.
+    SampleInsecureKafka:
+        Orderer:
+            <<: *OrdererDefaults
+            OrdererType: kafka
+        Application:
+            <<: *ApplicationDefaults
 
 ################################################################################
 #
@@ -34,27 +43,6 @@ Organizations:
     # SampleOrg defines an MSP using the sampleconfig.  It should never be used
     # in production but may be used as a template for other definitions
     - &OrdererOrg
-        # DefaultOrg defines the organization which is used in the sampleconfig
-        # of the fabric.git development environment
-        Name: OrdererOrg
-
-        # ID to load the MSP definition as
-        ID: OrdererMSP
-
-        # MSPDir is the filesystem path which contains the MSP configuration
-        MSPDir: examples/e2e/crypto/orderer/localMspConfig
-
-        # BCCSP (Blockchain crypto provider): Select which crypto implementation or
-        # library to use
-        BCCSP:
-            Default: SW
-            SW:
-                Hash: SHA2
-                Security: 256
-                # Location of Key Store. If this is unset, a location will
-                # be chosen using 'MSPDir'/keystore
-                FileKeyStore:
-                    KeyStore:
 
     - &Org0
 
@@ -73,7 +61,7 @@ Orderer: &OrdererDefaults
     OrdererType: solo
 
     Addresses:
-        - 127.0.0.1:7050
+        - 0.0.0.0:20005
 
     # Batch Timeout: The amount of time to wait before creating a batch
     BatchTimeout: 10s
@@ -97,7 +85,9 @@ Orderer: &OrdererDefaults
         # Brokers: A list of Kafka brokers to which the orderer connects
         # NOTE: Use IP:port notation
         Brokers:
-            - 127.0.0.1:9092
+            - 9.47.152.125:20003
+            - 9.47.152.124:20003
+            - 9.47.152.126:20003
 
     # Organizations is the list of orgs which are defined as participants on
     # the orderer side of the network
