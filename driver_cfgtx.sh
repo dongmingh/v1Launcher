@@ -21,7 +21,8 @@ function printHelp {
    echo "    -t: orderer service [solo|kafka], default=solo"
    echo "    -f: profile name, default=testOrg"
    echo "    -b: MSP directory, default=/mnt/crypto-config"
-   echo "    -x: host ip 1, default=0.0.0.0"
+   echo "    -w: host ip 1, default=0.0.0.0"
+   echo "    -x: Kafka B ip, default=0.0.0.0"
    echo "    -y: host ip 2, default=0.0.0.0"
    echo "    -z: host port, default=7050"
    echo " "
@@ -33,7 +34,7 @@ function printHelp {
 CWD=$PWD
 #default vars
 inFile=$CWD"/configtx.yaml-in"
-cfgOutFile=$CWD"/configtx.yml"
+cfgOutFile=$CWD"/configtx.yaml"
 
 nOrderer=1
 ordServType="solo"
@@ -153,17 +154,28 @@ do
               echo "                - *PeerOrg$i" >> $cfgOutFile
           done
 
+      elif [ "$t2" == "*OrdererOrg" ]; then
+          for (( i=1; i<=$nOrderer; i++ ))
+          do
+              echo "                - $t2$i" >> $cfgOutFile
+          done
+
       elif [ "$t1" == "OrdererType:" ]; then
           echo "    $t1 $ordServType" >> $cfgOutFile
 
       elif [ "$t1" == "&ProfileString" ]; then
           echo "    $PROFILE_STRING:" >> $cfgOutFile
 
+      elif [ "$t1" == "Addresses:" ]; then
+          echo "$line" >> $cfgOutFile
+          echo "         - $KafkaAIP":"$OrdererPort, $KafkaBIP":"$OrdererPort, $KafkaCIP":"$OrdererPort" >> $cfgOutFile
+
       elif [ "$t1" == "Brokers:" ]; then
           echo "        $t1" >> $cfgOutFile
-          echo "             - $KafkaAIP":"$KafkaPort" >> $cfgOutFile
-          echo "             - $KafkaBIP":"$KafkaPort" >> $cfgOutFile
-          echo "             - $KafkaCIP":"$KafkaPort" >> $cfgOutFile
+          echo "             - $KafkaAIP":"$KafkaPort, $KafkaBIP":"$KafkaPort, $KafkaCIP":"$KafkaPort" >> $cfgOutFile
+#          echo "             - $KafkaAIP":"$KafkaPort" >> $cfgOutFile
+#          echo "             - $KafkaBIP":"$KafkaPort" >> $cfgOutFile
+#          echo "             - $KafkaCIP":"$KafkaPort" >> $cfgOutFile
 
       elif [ "$t2" == "&OrdererOrg" ]; then
           echo "OrdererOrg ... "

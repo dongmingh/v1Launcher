@@ -61,7 +61,6 @@ Orderer: &OrdererDefaults
     OrdererType: solo
 
     Addresses:
-        - 0.0.0.0:20005
 
     # Batch Timeout: The amount of time to wait before creating a batch
     BatchTimeout: 10s
