@@ -3,7 +3,7 @@
 #
 # usage: ./driver_cfgtx.sh [opt] [value]
 # example:
-#    ./driver_cfgtx.sh -o 1 -p 2 -r 6 -h SHA2 -s 256 -t kafka -b /mnt/crypto-config -w 9.47.152.126 -x 9.47.152.125 -y 9.47.152.124 -z 20000
+#    ./driver_cfgtx-partial.sh -o 1 -p 2 -r 6 -h SHA2 -s 256 -t kafka -b /mnt/crypto-config -w 9.47.152.126 -x 9.47.152.125 -y 9.47.152.124 -z 20000 -v 1 -v 3
 #
 
 HostIP1="0.0.0.0"
@@ -27,7 +27,7 @@ function printHelp {
    echo "    -z: host port, default=7050"
    echo " "
    echo "Example:"
-   echo " ./driver_cfgtx.sh -o 1 -p 2 -r 6 -h SHA2 -s 256 -t kafka -b /mnt/crypto-config -w 9.47.152.126 -x 9.47.152.125 -y 9.47.152.124 -z 20000"
+   echo " ./driver_cfgtx-partial.sh -o 1 -p 2 -r 6 -h SHA2 -s 256 -t kafka -b /mnt/crypto-config -w 9.47.152.126 -x 9.47.152.125 -y 9.47.152.124 -z 20000 -v 1 -v 3"
    exit
 }
 
@@ -46,7 +46,8 @@ SecType="256"
 PROFILE_STRING="testOrg"
 MSPBaseDir="/mnt/crypto-config/"
 
-while getopts ":o:p:s:h:r:t:f:b:w:x:y:z:" opt; do
+k=0
+while getopts ":o:p:s:h:r:t:f:b:w:x:y:z:v:" opt; do
   case $opt in
     # number of orderers
     o)
@@ -117,6 +118,12 @@ while getopts ":o:p:s:h:r:t:f:b:w:x:y:z:" opt; do
       echo "BasePort: $BasePort, HostPort: $HostPort, OrdererPort: $OrdererPort, KafkaPort: $KafkaPort"
       ;;
 
+    v)
+      k=$[ k + 1 ]
+      OrgArray[$k]=$OPTARG
+      echo "k:  $k, ${#arr[@]}, OrgArray=${OrgArray[@]}"
+      ;;
+
     # else
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -136,6 +143,19 @@ echo "Host IP=$HostIP1, $HostIP2, Port=$HostPort"
 echo "Kafka IP=$KafkaAIP, $KafkaBIP, $KafkaCIP"
 echo "inFile=$inFile"
 echo "cfgOutFile=$cfgOutFile"
+echo "OrgArray length=${#OrgArray[@]}, OrgArray=${OrgArray[@]}"
+
+# sanity check on OrgArray
+if (( ${#OrgArray[@]} > $nOrg )); then
+   echo "invalid number of org "
+   exit
+elif [ ${#OrgArray[@]} = 0 ]; then
+   for (( i=1; i <= $nOrg; i++ ))
+   do
+       OrgArray[$i]=$i
+   done
+fi
+#echo "after loop OrgArray length=${#OrgArray[@]}, OrgArray=${OrgArray[@]}"
 
 #remove existing cfgOutFile
 rm -f $cfgOutFile
@@ -149,19 +169,14 @@ do
     #echo "t1:t2=$t1:$t2"
       #Profiles
       if [ "$t2" == "*Org0" ]; then
-          for (( i=1; i<=$nOrg; i++ ))
+          for (( i=1; i<=${#OrgArray[@]}; i++ ))
           do
-              echo "                - *PeerOrg$i" >> $cfgOutFile
-          done
-
-      elif [ "$t2" == "*OrdererOrg" ]; then
-          for (( i=1; i<=$nOrderer; i++ ))
-          do
-              echo "                - $t2$i" >> $cfgOutFile
+              tmp=${OrgArray[$i]}
+              echo "                - *PeerOrg$tmp" >> $cfgOutFile
           done
 
       elif [ "$t1" == "OrdererType:" ]; then
-          echo "    $t1 $ordServType" >> $cfgOutFile
+          echo "            $t1 $ordServType" >> $cfgOutFile
 
       elif [ "$t1" == "&ProfileString" ]; then
           echo "    $PROFILE_STRING:" >> $cfgOutFile
@@ -173,9 +188,6 @@ do
       elif [ "$t1" == "Brokers:" ]; then
           echo "        $t1" >> $cfgOutFile
           echo "             - $KafkaAIP":"$KafkaPort, $KafkaBIP":"$KafkaPort, $KafkaCIP":"$KafkaPort" >> $cfgOutFile
-#          echo "             - $KafkaAIP":"$KafkaPort" >> $cfgOutFile
-#          echo "             - $KafkaBIP":"$KafkaPort" >> $cfgOutFile
-#          echo "             - $KafkaCIP":"$KafkaPort" >> $cfgOutFile
 
       elif [ "$t2" == "&OrdererOrg" ]; then
           echo "OrdererOrg ... "
@@ -227,8 +239,8 @@ do
              echo "        AnchorPeers:" >> $cfgOutFile
              echo "            - Host: $HostIP1" >> $cfgOutFile
              echo "              Port: $tmpPort" >> $cfgOutFile
-             echo "            - Host: $HostIP2" >> $cfgOutFile
-             echo "              Port: $tmpPort" >> $cfgOutFile
+#             echo "            - Host: $HostIP2" >> $cfgOutFile
+#             echo "              Port: $tmpPort" >> $cfgOutFile
              echo "" >> $cfgOutFile
 
           done
