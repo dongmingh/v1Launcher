@@ -3,7 +3,7 @@
 #
 # usage: ./driver_cfgtx.sh [opt] [value]
 # example:
-#    ./driver_cfgtx-partial.sh -o 1 -p 2 -r 6 -h SHA2 -s 256 -t kafka -b /mnt/crypto-config -w 9.47.152.126 -x 9.47.152.125 -y 9.47.152.124 -z 20000 -v 1 -v 3
+#    ./driver_cfgtx.sh -o 1 -p 2 -r 6 -h SHA2 -s 256 -t kafka -b /mnt/crypto-config -w 9.47.152.126 -x 9.47.152.125 -y 9.47.152.124 -z 20000 -v 1 -v 3
 #
 
 HostIP1="0.0.0.0"
@@ -25,9 +25,10 @@ function printHelp {
    echo "    -x: Kafka B ip, default=0.0.0.0"
    echo "    -y: host ip 2, default=0.0.0.0"
    echo "    -z: host port, default=7050"
+   echo "    -v: list of organization in a channel, default=all"
    echo " "
    echo "Example:"
-   echo " ./driver_cfgtx-partial.sh -o 1 -p 2 -r 6 -h SHA2 -s 256 -t kafka -b /mnt/crypto-config -w 9.47.152.126 -x 9.47.152.125 -y 9.47.152.124 -z 20000 -v 1 -v 3"
+   echo " ./driver_cfgtx.sh -o 1 -p 2 -r 6 -h SHA2 -s 256 -t kafka -b /mnt/crypto-config -w 9.47.152.126 -x 9.47.152.125 -y 9.47.152.124 -z 20000 -v 1 -v 3"
    exit
 }
 
@@ -176,7 +177,7 @@ do
           done
 
       elif [ "$t1" == "OrdererType:" ]; then
-          echo "            $t1 $ordServType" >> $cfgOutFile
+          echo "    $t1 $ordServType" >> $cfgOutFile
 
       elif [ "$t1" == "&ProfileString" ]; then
           echo "    $PROFILE_STRING:" >> $cfgOutFile
@@ -189,11 +190,18 @@ do
           echo "        $t1" >> $cfgOutFile
           echo "             - $KafkaAIP":"$KafkaPort, $KafkaBIP":"$KafkaPort, $KafkaCIP":"$KafkaPort" >> $cfgOutFile
 
+      elif [ "$t2" == "*OrdererOrg" ]; then
+          echo "OrdererOrg ... "
+          for (( i=1; i<=$nOrderer; i++ ))
+          do
+             echo "                - $t2$i" >> $cfgOutFile
+          done
+
       elif [ "$t2" == "&OrdererOrg" ]; then
           echo "OrdererOrg ... "
           for (( i=1; i<=$nOrderer; i++ ))
           do
-             j=$[ peersPerOrg * ( i - 1 ) ]
+             j=$[ peersPerOrg * ( i - 1 ) + 1 ]
              tmp="OrdererOrg"$i
              tt="Orderer"$i"MSP"
              echo "    - &$tmp" >> $cfgOutFile
@@ -216,7 +224,7 @@ do
       elif [ "$t2" == "&Org0" ]; then
           for (( i=1; i<=$nOrg; i++ ))
           do
-             j=$[ peersPerOrg * ( i - 1 ) ]
+             j=$[ peersPerOrg * ( i - 1 ) + 1 ]
              tt="PeerOrg"$i
              echo "    - &$tt" >> $cfgOutFile
              tmp="Peer"$i"MSP"
@@ -239,8 +247,8 @@ do
              echo "        AnchorPeers:" >> $cfgOutFile
              echo "            - Host: $HostIP1" >> $cfgOutFile
              echo "              Port: $tmpPort" >> $cfgOutFile
-#             echo "            - Host: $HostIP2" >> $cfgOutFile
-#             echo "              Port: $tmpPort" >> $cfgOutFile
+             echo "            - Host: $HostIP2" >> $cfgOutFile
+             echo "              Port: $tmpPort" >> $cfgOutFile
              echo "" >> $cfgOutFile
 
           done
