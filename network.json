@@ -23,7 +23,8 @@
             "environment": {
                  "KAFKA_BROKER_ID": "0",
                  "KAFKA_ZOOKEEPER_CONNECT": "zookeeper:2181",
-                 "KAFKA_DEFAULT_REPLICATION_FACTOR": "3"
+                 "KAFKA_DEFAULT_REPLICATION_FACTOR": "3",
+                 "KAFKA_UNCLEAN_LEADER_ELECTION_ENABLE": "false"
             },
             "depends_on": [
                  "zookeeper"
@@ -46,12 +47,14 @@
             "working_dir": "/opt/gopath/src/github.com/hyperledger/fabric",
             "command": "orderer",
             "volumes": [
-                 "./crypto/orderer:/var/hyperledger/orderer"
             ],
             "ports": [
                  "7050:7050"
             ],
             "container_name": "orderer",
+            "depends_on": [
+                 "kafka"
+            ],
             "networks": [
                  "bridge"
             ]
@@ -74,9 +77,7 @@
                  "CORE_PEER_LOCALMSPID": "Org0MSP"
             },
             "volumes": [
-                  "/var/run/:/host/var/run/",
-                  "./crypto/peer/:/var/hyperledger/msp/",
-                  "./examples/:/opt/gopath/src/github.com/hyperledger/fabric/examples/"
+                  "/var/run/:/host/var/run/"
             ],
             "ports": [
                   "PORTID:7051"
@@ -112,13 +113,7 @@
             "working_dir": "/opt/gopath/src/github.com/hyperledger/fabric/peer",
             "command": "sh -c './script.sh | tee  results.log 2>&1; sleep 100000'",
             "volumes": [
-                    "/var/run/:/host/var/run/",
-                    "./examples/:/opt/gopath/src/github.com/hyperledger/fabric/examples/",
-                    "./crypto/orderer/channel.tx:/opt/gopath/src/github.com/hyperledger/fabric/peer/channel.tx",
-                    "./crypto/peer/peer0/localMspConfig:/opt/gopath/src/github.com/hyperledger/fabric/msp/sampleconfig",
-                    "./crypto:/opt/gopath/src/github.com/hyperledger/fabric/examples/e2e/crypto/",
-                    "./script.sh:/opt/gopath/src/github.com/hyperledger/fabric/peer/script.sh",
-                    "./results.log:/opt/gopath/src/github.com/hyperledger/fabric/peer/results.log"
+                    "/var/run/:/host/var/run/"
             ],
             "depends_on": [
                   "orderer0",

@@ -1,9 +1,9 @@
 #!/bin/bash
 
-#
-# example:
-#    ./NetworkLauncher.sh -o 1 -r 2 -p 3 -f testOrg -k 1 -t kafka -d goleveldb -c .
-#
+
+FabricDir="/root/gopath/src/github.com/hyperledger/fabric"
+MSPDir="/root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config"
+SRCMSPDir="/opt/hyperledger/fabric/msp/crypto-config"
 
 function printHelp {
 
@@ -13,18 +13,19 @@ function printHelp {
    echo "    -f: profile string, default=testOrg"
    echo "    -h: hash type, default=SHA2"
    echo "    -k: number of kafka, default=solo"
+   echo "    -n: number of channels, default=1"
    echo "    -o: number of orderers, default=1"
    echo "    -p: number of peers per organization, default=1"
    echo "    -r: number of organizations, default=1"
    echo "    -s: security type, default=256"
    echo "    -t: ledger orderer service type [solo|kafka], default=solo"
    echo "    -c: crypto directory, default=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen"
-   echo "    -x: host ip 1, default=0.0.0.0"
-   echo "    -y: host ip 2, default=0.0.0.0"
-   echo "    -z: host port, default=7050"
+   echo "    -w: host ip 1, default=0.0.0.0"
+   echo "    -F: local MSP base directory, default=/root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config"
+   echo "    -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config"
    echo " "
    echo " example: "
-   echo " ./NetworkLauncher.sh -o 1 -r 2 -p 3 -k 1 -t kafka -f testOrg -w 9.47.152.126 -x 9.47.152.125 -y 9.47.152.124 -z 20000 "
+   echo " ./NetworkLauncher.sh -o 1 -r 2 -p 2 -k 1 -n 5 -t kafka -f testOrg -w 10.120.223.35 "
    exit
 }
 
@@ -39,9 +40,10 @@ ledgerDB="goleveldb"
 hashType="SHA2"
 secType="256"
 CryptoBaseDir=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen
+nChannel=1
 
 
-while getopts ":d:f:h:k:o:p:r:t:s:c:w:x:y:z:" opt; do
+while getopts ":d:f:h:k:n:o:p:r:t:s:c:w:F:G:" opt; do
   case $opt in
     # peer environment options
     d)
@@ -62,6 +64,11 @@ while getopts ":d:f:h:k:o:p:r:t:s:c:w:x:y:z:" opt; do
     k)
       nKafka=$OPTARG
       echo "number of kafka: $kafka"
+      ;;
+
+    n)
+      nChannel=$OPTARG
+      echo "number of channels: $nChannel"
       ;;
 
     o)
@@ -96,26 +103,19 @@ while getopts ":d:f:h:k:o:p:r:t:s:c:w:x:y:z:" opt; do
 
     w)
       HostIP1=$OPTARG
-      KafkaAIP=$OPTARG
       echo "HostIP1:  $HostIP1"
       ;;
 
-    x)
-      KafkaBIP=$OPTARG
-      echo "KafkaIP:  $KafkaIP"
+    F)
+      MSPDIR=$OPTARG
+      export MSPDIR=$MSPDIR
+      echo "MSPDIR: $MSPDIR"
       ;;
-
-    y)
-      HostIP2=$OPTARG
-      KafkaCIP=$OPTARG
-      echo "HostIP2:  $HostIP2"
+    G)
+      SRCMSPDIR=$OPTARG
+      export SRCMSPDIR=$SRCMSPDIR
+      echo "SRCMSPDIR: $SRCMSPDIR"
       ;;
-
-    z)
-      BasePort=$OPTARG
-      echo "BasePort: $BasePort, HostPort: $HostPort, OrdererPort: $OrdererPort, KafkaPort: $KafkaPort"
-      ;;
-
 
     # else
     \?)
@@ -140,9 +140,13 @@ CWD=$PWD
 echo "current working directory: $CWD"
 echo "GOPATH=$GOPATH"
 
-# cryptogen ..................
+        ####################################
+        #     execute cryptogen            #
+        ####################################
 echo "generate crypto ..."
 cd $CryptoBaseDir
+# remove existing crypto-config
+rm -rf crypto-config
 echo "current working directory: $PWD"
 go build
 cd $CWD
@@ -152,23 +156,42 @@ CRYPTOEXE=$CryptoBaseDir/cryptogen
 $CRYPTOEXE -baseDir $CryptoBaseDir -ordererNodes $nOrderer -peerOrgs $nOrg -peersPerOrg $nPeersPerOrg
 
 
-# configtx ..................
-echo "generate configtx.yml ..."
+        ####################################
+        #     generate configtx.yaml       #
+        ####################################
+echo "generate configtx.yaml ..."
 cd $CWD
 echo "current working directory: $PWD"
-#CFGGenDir=$GOPATH/src/github.com/hyperledger/fabric/common/configtx/tool/configtxgen
+
+echo "./driver_cfgtx_x.sh -o $nOrderer -k $nKafka -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $PROFILE_STRING -w $HostIP1"
+./driver_cfgtx_x.sh -o $nOrderer -k $nKafka -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $PROFILE_STRING -w $HostIP1
+
+        ####################################
+        #     create orderer.block         #
+        ####################################
+CFGGenDir=$GOPATH/src/github.com/hyperledger/fabric/build/bin
+CFGEXE=$CFGGenDir"/configtxgen"
+cp configtx.yaml $FabricDir"/common/configtx/tool"
 #cd $CFGGenDir
+if [ ! -f $CFGEXE ]; then
+    cd $FabricDir
+    make configtxgen
+fi
+$CFGEXE -profile $PROFILE_STRING -outputBlock $FabricDir"/common/tools/cryptogen/crypto-config/ordererOrganizations/orderer.block" 
+i=1
+    $CFGEXE -profile $PROFILE_STRING -channelID $PROFILE_STRING"$i" -outputCreateChannelTx $FabricDir"/common/tools/cryptogen/crypto-config/ordererOrganizations/"$PROFILE_STRING$i".block"
+for (( i=2; i<=$nChannel; i++ ))
+do
+    $CFGEXE -profile $PROFILE_STRING -channelID $PROFILE_STRING"$i" -outputCreateChannelTx $FabricDir"/common/tools/cryptogen/crypto-config/ordererOrganizations/"$PROFILE_STRING$i".block"
+done
 
-echo "./driver_cfgtx.sh -o $nOrderer -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $PROFILE_STRING"
-./driver_cfgtx.sh -o $nOrderer -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $PROFILE_STRING -w $KafkaAIP -x $KafkaBIP -y $KafkaCIP -z $BasePort
-
-
-# network gen ..................
+        ####################################
+        #    bring up network              #
+        ####################################
 echo "generate docker-compose.yml ..."
 echo "current working directory: $PWD"
 nPeers=$[ nPeersPerOrg * nOrg ]
 echo "number of peers: $nPeers"
-cryptoDir="crypto-config"
-echo "./driver_GenOpt.sh -a create -p $nPeers -o $nOrderer -k $nKafka -t $ordServType -d $ordServType -F $cryptoDir"
-./driver_GenOpt.sh -a create -p $nPeers -o $nOrderer -k $nKafka -t $ordServType -d $ordServType -F $cryptoDir
+echo "./driver_GenOpt.sh -a create -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir"
+./driver_GenOpt.sh -a create -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir
 

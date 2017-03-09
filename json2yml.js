@@ -5,6 +5,8 @@ var cfgFile = process.argv[2];
 var dFile = __dirname + "/" + "docker-compose.yml";
 fs.createWriteStream(dFile);
 
+var MSPDir='/opt/hyperledger/fabric/msp/crypto-config';
+var srcMSPDir='/root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config';
 var CA=0;
 var CDB=0;
 var KAFKA=0;
@@ -12,15 +14,19 @@ var KAFKA=0;
 // Orderer environment var
 var ord_env_name=[];
 var ord_env_val=[];
-var msp_env_name=[];
-var msp_env_val=[];
-if ( process.env.LOCALMSPDIR != null ) {
-    console.log(' LOCALMSPDIR= ', process.env.LOCALMSPDIR);
-    msp_env_name.push('LOCALMSPDIR');
-    msp_env_val.push(process.env.LOCALMSPDIR);
+if ( process.env.MSPDIR != null ) {
+    console.log(' MSPDIR= ', process.env.MSPDIR);
+    MSPDir=process.env.MSPDIR;
 }
-console.log('msp_env_name: ', msp_env_name.length, msp_env_name);
-console.log('msp_env_val: ', msp_env_val.length, msp_env_val);
+console.log('MSPDir: ', MSPDir);
+
+if ( process.env.SRCMSPDIR != null ) {
+    console.log(' SRCMSPDIR= ', process.env.SRCMSPDIR);
+    srcMSPDir=process.env.SRCMSPDIR;
+}
+console.log('srcMSPDir: ', srcMSPDir);
+var ordererMSPDir=MSPDir+'/ordererOrganizations';
+var peerMSPDir=MSPDir+'/peerOrganizations';
 
 if ( process.env.ORDERER_GENESIS_BATCHSIZE_MAXMESSAGECOUNT != null ) {
     console.log(' ORDERER_GENESIS_BATCHSIZE_MAXMESSAGECOUNT= ', process.env.ORDERER_GENESIS_BATCHSIZE_MAXMESSAGECOUNT);
@@ -70,21 +76,26 @@ console.log('peer_env_val: ', peer_env_val.length, peer_env_val);
 console.log('network cfg: ', cfgFile);
 console.log('docker composer: ', dFile);
 
-var addVP = parseInt(process.argv[3]);
-console.log('add peer: ', addVP);
+var nPeerPerOrg = parseInt(process.argv[3]);;
+console.log('nPeerPerOrg: ', nPeerPerOrg);
 
-var VPName = 'peer' + addVP;
 
 var addOrderer = parseInt(process.argv[4]);;
-console.log('add Orderer: ', addOrderer);
+console.log('number of Orderer: ', addOrderer);
 
 var addBroker = parseInt(process.argv[5]);
-console.log('add Kafka Broker: ', addBroker);
+console.log('number of Kafka Broker: ', addBroker);
+
+var nOrg = parseInt(process.argv[6]);;
+console.log('number of orgs: ', nOrg);
+
+var addVP = nPeerPerOrg*nOrg;
+console.log('number of peer: ', addVP);
 
 //console.log(' input argv length', process.argv.length);
 var dbType = 'none';
-if (process.argv.length == 7) {
-   dbType = process.argv[6];
+if (process.argv.length == 8) {
+   dbType = process.argv[7];
 }
 console.log('DB type: ', dbType);
 
@@ -315,7 +326,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                         }
                                     } else if ( lvl3_key[m] == 'ORDERER_GENERAL_GENESISFILE' ) {
                                             var t = v+1;
-                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + '../common/tools/cryptogen/'+msp_env_val[0]+ '/ordererOrganizations/ordererOrg' +t+'/orderer.block' + '\n';
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + ordererMSPDir + '/orderer.block' + '\n';
                                             fs.appendFileSync(dFile, buff);
                                     } else if ( lvl3_key[m] == 'ORDERER_GENERAL_LOCALMSPID' ) {
                                             var t = v+1;
@@ -323,7 +334,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                             fs.appendFileSync(dFile, buff);
                                     } else if ( lvl3_key[m] == 'ORDERER_GENERAL_LOCALMSPDIR' ) {
                                             var t = v+1;
-                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + '../common/tools/cryptogen/'+msp_env_val[0]+ '/ordererOrganizations/ordererOrg' +t+'/msp' + '\n';
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + ordererMSPDir + '/ordererOrg' + '' +t+'/orderers/ordererOrg'+t+'orderer'+t + '\n';
                                             fs.appendFileSync(dFile, buff);
                                     } else {
                                         buff = '  ' + '    - ' + lvl3_key[m] + '=' +lvl2_obj[lvl3_key[m]] + '\n';
@@ -338,6 +349,21 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                         } else if ( lvl2_key[k] == 'container_name' ) {
                             buff = '  ' + '  ' + lvl2_key[k] + ': ' + tmp_name + '\n';
                             fs.appendFileSync(dFile, buff);
+                        } else if ( lvl2_key[k] == 'volumes' ) {
+                            var lvl2_obj = lvl1_obj[lvl2_key[k]];
+
+                            buff = '  ' + '  ' + lvl2_key[k] + ': ' + '\n';
+                            fs.appendFileSync(dFile, buff);
+
+                            // header 4
+                            for ( m=0; m< lvl2_obj.length; m++ ) {
+                                buff = '  ' + '    - ' +lvl2_obj[m] + '\n';
+                                fs.appendFileSync(dFile, buff);
+
+                            }
+                                buff = '  ' + '    - ' + srcMSPDir + ':' + MSPDir + '\n';
+                                fs.appendFileSync(dFile, buff);
+
                         } else if ( lvl2_key[k] == 'ports' ) {
                                 lvl2_obj = lvl1_obj[lvl2_key[k]];
                                 lvl3_key = Object.keys(lvl2_obj);
@@ -540,8 +566,11 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                             buff = '  ' + '    - ' + lvl3_key[m] + '=' + 'Peer'+t+'MSP' + '\n';
                                             fs.appendFileSync(dFile, buff);
                                     } else if ( lvl3_key[m] == 'CORE_PEER_MSPCONFIGPATH' ) {
-                                            var t = (v - v%2)/2 + 1;
-                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + '../common/tools/cryptogen/'+msp_env_val[0]+'/peerOrganizations/peerOrg'+t +'/msp' + '\n';
+                                            //var t = (v - v%2)/2 + 1;
+                                            var t = Math.floor(v / nPeerPerOrg) + 1;
+                                            var s = (v % nPeerPerOrg) + 1;
+                                            //console.log('CORE_PEER_MSPCONFIGPATH: ', v, t, s);
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + peerMSPDir + '/peerOrg'+t +'/peers/peerOrg'+t+'Peer'+s+ '\n';
                                             fs.appendFileSync(dFile, buff);
                                     } else {
                                         buff = '  ' + '    - ' + lvl3_key[m] + '=' +lvl2_obj[lvl3_key[m]] + '\n';
@@ -620,6 +649,8 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                 fs.appendFileSync(dFile, buff);
 
                             }
+                                buff = '  ' + '    - ' + srcMSPDir+':'+ MSPDir + '\n';
+                                fs.appendFileSync(dFile, buff);
 
                         } else if ( lvl2_key[k] == 'depends_on'  ){
                             var lvl2_obj = lvl1_obj[lvl2_key[k]];
@@ -712,7 +743,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                 fs.appendFileSync(dFile, buff);
                             }
 
-                    } else if ( ( lvl2_key[k] == 'ports' ) || ( lvl2_key[k] == 'volumes' )  ){
+                    } else if ( lvl2_key[k] == 'ports' ){
                         var lvl2_obj = lvl1_obj[lvl2_key[k]];
                         //console.log('lvl2_obj: %d ', lvl2_obj.length, lvl2_obj);
 
@@ -725,6 +756,22 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                             fs.appendFileSync(dFile, buff);
 
                         }
+
+                    } else if ( lvl2_key[k] == 'volumes' ){
+                        var lvl2_obj = lvl1_obj[lvl2_key[k]];
+                        //console.log('lvl2_obj: %d ', lvl2_obj.length, lvl2_obj);
+
+                        buff = '  ' + '  ' + lvl2_key[k] + ': ' + '\n';
+                        fs.appendFileSync(dFile, buff);
+
+                        // header 4
+                        for ( m=0; m< lvl2_obj.length; m++ ) {
+                            buff = '  ' + '    - ' +lvl2_obj[m] + '\n';
+                            fs.appendFileSync(dFile, buff);
+
+                        }
+                            buff = '  ' + '    - ' + srcMSPDir+':'+ MSPDir + '\n';
+                            fs.appendFileSync(dFile, buff);
 
                     } else {
                         buff = '  ' + '  ' + lvl2_key[k] + ': ' + '\n';

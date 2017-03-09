@@ -2,8 +2,6 @@
 
 #
 # usage: ./driver_GenOpt.sh [opt] [value]
-# example:
-#    ./driver_GenOpt.sh -p 4 -o 1 -k 1 -t kafka -d goleveldb
 #
 
 
@@ -13,10 +11,12 @@ function printHelp {
    echo " ./driver_ord.sh [opt] [value] "
    echo "    network variables"
    echo "       -a: action [create|add] "
-   echo "       -p: number of peers "
+   echo "       -p: number of peers per organization"
    echo "       -o: number of orderers "
    echo "       -k: number of brokers "
-   echo "       -F: MSP base directory "
+   echo "       -r: number of organiztions "
+   echo "       -F: local MSP base directory, default=/root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config"
+   echo "       -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config"
    echo " "
    echo "    peer environment variables"
    echo "       -l: core logging level [(default = not set)|CRITICAL|ERROR|WARNING|NOTICE|INFO|DEBUG]"
@@ -28,16 +28,16 @@ function printHelp {
    echo "       -c: batch timeout [10s|max secs before send an unfilled batch] "
    echo " "
    echo "Example:"
-   echo "   ./driver_GenOpt.sh -p 4 -o 1 -k 1 -t kafka -d goleveldb -F crypto-config"
+   echo "   ./driver_GenOpt.sh -a create -p 2 -r 2 -o 1 -k 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config "
    echo " "
    exit
 }
 
 #init var
 nBroker=0
-nPeer=1
+nPeerPerOrg=1
 
-while getopts ":l:d:b:c:t:a:o:k:p:F:" opt; do
+while getopts ":l:d:b:c:t:a:o:k:p:r:F:G:" opt; do
   case $opt in
     # peer environment options
     l)
@@ -62,10 +62,16 @@ while getopts ":l:d:b:c:t:a:o:k:p:F:" opt; do
       echo "ORDERER_GENESIS_BATCHTIMEOUT: $ORDERER_GENESIS_BATCHTIMEOUT"
       ;;
     F)
-      LOCALMSPDIR=$OPTARG
-      export LOCALMSPDIR=$LOCALMSPDIR
-      echo "LOCALMSPDIR: $LOCALMSPDIR"
+      SRCMSPDIR=$OPTARG
+      export SRCMSPDIR=$SRCMSPDIR
+      echo "SRCMSPDIR: $SRCMSPDIR"
       ;;
+    G)
+      MSPDIR=$OPTARG
+      export MSPDIR=$MSPDIR
+      echo "MSPDIR: $MSPDIR"
+      ;;
+
     t)
       ORDERER_GENESIS_ORDERERTYPE=$OPTARG
       export ORDERER_GENESIS_ORDERERTYPE=$ORDERER_GENESIS_ORDERERTYPE
@@ -85,9 +91,15 @@ while getopts ":l:d:b:c:t:a:o:k:p:F:" opt; do
       echo "# of Broker: $nBroker"
       ;;
     p)
-      nPeer=$OPTARG
-      echo "# of peer: $nPeer"
+      nPeerPerOrg=$OPTARG
+      echo "# of peer per org: $nPeerperOrg"
       ;;
+
+    r)
+      nOrg=$OPTARG
+      echo "# of nOrg: $nOrg"
+      ;;
+
     o)
       nOrderer=$OPTARG
       echo "# of orderer: $nOrderer"
@@ -117,7 +129,7 @@ fi
 
 
 dbType=`echo "$db" | awk '{print tolower($0)}'`
-echo "action=$Req nPeer=$nPeer nBroker=$nBroker nOrderer=$nOrderer dbType=$dbType"
+echo "action=$Req nPeerPerOrg=$nPeerPerOrg nBroker=$nBroker nOrderer=$nOrderer dbType=$dbType"
 VP=`docker ps -a | grep 'peer node start' | wc -l`
 echo "existing peers: $VP"
 
@@ -140,19 +152,18 @@ echo "jsonFILE $jsonFILE"
 
 # create docker compose yml
 if [ $Req == "add" ]; then
-    N1=$[nPeer+VP]
+    N1=$[ nPeerPerOrg * nOrg + VP]
     N=$[N1]
     VPN="peer"$[N-1]
 else
-    N1=$nPeer
+    N1=$[ nPeerPerOrg * nOrg ]
     N=$[N1 - 1]
     VPN="peer"$N
 fi
 
-## echo "N1=$N1 VP=$VP nPeer=$nPeer VPN=$VPN"
+## echo "N1=$N1 VP=$VP nPeerPerOrg=$nPeerPerOrg VPN=$VPN"
 
-node json2yml.js $jsonFILE $N1 $nOrderer $nBroker $dbType
-# exit ......
+node json2yml.js $jsonFILE $nPeerPerOrg $nOrderer $nBroker $nOrg $dbType
 
 ## sed 's/-x86_64/TEST/g' docker-compose.yml > ss.yml
 ## cp ss.yml docker-compose.yml
