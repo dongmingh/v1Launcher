@@ -215,28 +215,24 @@ do
           #echo "         - $peerIP":"$ordererPort, $peerIP":"$[ ordererPort + 1 ], $peerIP":"$[ ordererPort + 2 ]" >> $cfgOutFile
           tmp=$peerIP":"$ordererPort
           tmpPort=$ordererPort
-              tmp="orderer0:"$tmpPort
           for (( i=2; i<=$nOrderer; i++  ))
           do
               j=$[ i - 1 ]
               tmpPort=$[ tmpPort + j ]
-#              tmp=$tmp", "$peerIP":"$tmpPort
-              tmp=$tmp", "orderer$j":"$tmpPort
+              tmp=$tmp", "$peerIP":"$tmpPort
           done
           echo "         - $tmp" >> $cfgOutFile
 
       elif [ "$t1" == "Brokers:" ]; then
           echo "        $t1" >> $cfgOutFile
           #echo "             - $peerIP":"$kafkaPort, $peerIP":"$[ kafkaPort + 1 ], $peerIP":"$[ kafkaPort + 2 ]" >> $cfgOutFile
-#          tmp=$peerIP":"$kafkaPort
-#          tmpPort=$kafkaPort
-              tmp="kafka0:"$kafkaPort
+          tmp=$peerIP":"$kafkaPort
+          tmpPort=$kafkaPort
           for (( i=2; i<=$nKafka; i++  ))
           do
               j=$[ i - 1 ]
               tmpPort=$[ kafkaPort + j ]
-#              tmp=$tmp", "$peerIP":"$tmpPort
-              tmp=$tmp", "kafka$i":"$tmpPort
+              tmp=$tmp", "$peerIP":"$tmpPort
           done
           echo "             - $tmp" >> $cfgOutFile
 
