@@ -117,6 +117,8 @@ var vp0Addr;
 var vp0Port;
 var evtAddr;
 var evtPort;
+var kafkaAddr;
+var kafkaPort;
 var tmp;
 var e;
 
@@ -150,6 +152,12 @@ for ( i0=0; i0<top_key.length; i0++ ) {
     } else if ( top_key[i0] == 'vp0Port' ) {
          vp0Port = parseInt(lvl0_obj); 
          console.log('peer0 Port:', vp0Port);
+    } else if ( top_key[i0] == 'kafkaAddress' ) {
+         kafkaAddr = lvl0_obj;
+         console.log('kafka address:', kafkaAddr);
+    } else if ( top_key[i0] == 'kafkaPort' ) {
+         kafkaPort = parseInt(lvl0_obj);
+         console.log('kafka Port:', kafkaPort);
     } else if ( top_key[i0] == 'evtAddress' ) {
          evtAddr = lvl0_obj;
          console.log('event Hub address:', evtAddr);
@@ -372,7 +380,8 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                 fs.appendFileSync(dFile, buff);
                                 tmp_port = ordererPort + v;
 
-                                buff = '  ' + '    - ' + tmp_port +':' + tmp_port + '\n' ;
+                                buff = '  ' + '    - ' + tmp_port +':' + '7050' + '\n' ;
+                                //buff = '  ' + '    - ' + tmp_port +':' + tmp_port + '\n' ;
                                 fs.appendFileSync(dFile, buff);
 
                         } else if ( (lvl2_key[k] == 'depends_on') ) {
@@ -409,7 +418,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
              } else if (lvl1_key[i] == 'kafka' ) {
                 for ( v = 0; v < addBroker; v++ ) {
                     tmp_name = lvl1_key[i] + v;
-                    tmp_port = vp0Port + v;
+                    tmp_port = kafkaPort + v;
                     buff = '  ' + tmp_name +':' + '\n';
                     fs.appendFileSync(dFile, buff);
 
@@ -444,6 +453,17 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                             buff = '  ' + '  ' + lvl2_key[k] + ': ' + tmp_name + '\n';
                             fs.appendFileSync(dFile, buff);
 
+                        } else if ( lvl2_key[k] == 'ports' ) {
+                                lvl2_obj = lvl1_obj[lvl2_key[k]];
+                                lvl3_key = Object.keys(lvl2_obj);
+
+                                buff = '  ' + '  ' + lvl2_key[k] + ': ' + '\n';
+                                fs.appendFileSync(dFile, buff);
+                                //tmp_port = kafkaPort + v;
+
+                                buff = '  ' + '    - ' + tmp_port +':' + '9092' + '\n' ;
+                                //buff = '  ' + '    - ' + tmp_port +':' + tmp_port + '\n' ;
+                                fs.appendFileSync(dFile, buff);
                         } else {
                             buff = '  ' + '  ' + lvl2_key[k] + ': ' + '\n';
                             fs.appendFileSync(dFile, buff);

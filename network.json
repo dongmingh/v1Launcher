@@ -1,12 +1,14 @@
 {
     "ordererAddress": "0.0.0.0",
-    "ordererPort": "7050",
+    "ordererPort": "5005",
     "couchdbAddress": "0.0.0.0",
     "couchdbPort": "5984",
     "vp0Address": "0.0.0.0",
     "vp0Port": "7061",
+    "kafkaAddress": "0.0.0.0",
+    "kafkaPort": "9092",
     "evtAddress": "0.0.0.0",
-    "evtPort": "9061",
+    "evtPort": "6051",
     "version": "2",
     "networks":
             "bridge",
@@ -30,6 +32,9 @@
                  "zookeeper"
             ],
             "container_name": "kafka0",
+            "ports": [
+                 "9092:9092"
+            ],
             "networks": [
                  "bridge"
             ]
