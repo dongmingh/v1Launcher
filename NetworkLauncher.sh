@@ -1,6 +1,7 @@
 #!/bin/bash
 
 
+# default directories
 FabricDir="/root/gopath/src/github.com/hyperledger/fabric"
 MSPDir="/root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config"
 SRCMSPDir="/opt/hyperledger/fabric/msp/crypto-config"
@@ -153,8 +154,8 @@ cd $CWD
 echo "current working directory: $PWD"
 
 CRYPTOEXE=$CryptoBaseDir/cryptogen
+echo "$CRYPTOEXE -baseDir $CryptoBaseDir -ordererNodes $nOrderer -peerOrgs $nOrg -peersPerOrg $nPeersPerOrg"
 $CRYPTOEXE -baseDir $CryptoBaseDir -ordererNodes $nOrderer -peerOrgs $nOrg -peersPerOrg $nPeersPerOrg
-
 
         ####################################
         #     generate configtx.yaml       #
@@ -177,10 +178,11 @@ if [ ! -f $CFGEXE ]; then
     cd $FabricDir
     make configtxgen
 fi
+#create orderer blocks
 $CFGEXE -profile $PROFILE_STRING -outputBlock $FabricDir"/common/tools/cryptogen/crypto-config/ordererOrganizations/orderer.block" 
-i=1
-    $CFGEXE -profile $PROFILE_STRING -channelID $PROFILE_STRING"$i" -outputCreateChannelTx $FabricDir"/common/tools/cryptogen/crypto-config/ordererOrganizations/"$PROFILE_STRING$i".block"
-for (( i=2; i<=$nChannel; i++ ))
+
+#create channels blocks
+for (( i=1; i<=$nChannel; i++ ))
 do
     $CFGEXE -profile $PROFILE_STRING -channelID $PROFILE_STRING"$i" -outputCreateChannelTx $FabricDir"/common/tools/cryptogen/crypto-config/ordererOrganizations/"$PROFILE_STRING$i".block"
 done

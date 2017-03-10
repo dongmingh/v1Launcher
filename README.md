@@ -20,20 +20,27 @@ This is the main script to execute all tasks.
 ##Usage:
 
     ./NetworkLauncher.sh [opt] [value]
-       -d: ledger database type, default=goleveldb
-       -f: profile string, default=testOrg
-       -h: hash type, default=SHA2
-       -k: number of kafka, default=solo
-       -o: number of orderers, default=1
-       -p: number of peers per organization, default=1
-       -r: number of organizations, default=1
-       -s: security type, default=256
-       -t: ledger orderer service type [solo|kafka], default=solo
+       options:
+         -d: ledger database type, default=goleveldb
+         -f: profile string, default=testOrg
+         -h: hash type, default=SHA2
+         -k: number of kafka, default=solo
+         -n: number of channels, default=1
+         -o: number of orderers, default=1
+         -p: number of peers per organization, default=1
+         -r: number of organizations, default=1
+         -s: security type, default=256
+         -t: ledger orderer service type [solo|kafka], default=solo
+         -c: crypto directory, default=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen
+         -w: host ip 1, default=0.0.0.0
+         -F: local MSP base directory, default=/root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config
+         -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config
 
+    
 ##Example:
-    ./NetworkLauncher.sh -o 1 -k 1 -r 2 -p 3 -f myOrg
+    ./NetworkLauncher.sh -o 1 -r 2 -p 2 -k 1 -n 5 -t kafka -f testOrg -w 10.120.223.35
 
-
+The above command will invoke cryptogen, cfgtxgen, and launch network.
 
 #cryptogen
 
@@ -54,29 +61,32 @@ The executable is in $GOPATH/src/github.com/hyperledger/fabric/common/tools/cryp
     -peersPerOrg int
         number of peers per organization (default 1)
 
-##Example:
-    ./v1launcher.sh -o 1 -r 2 -p 3 -f testOrg -k 1 -t kafka -d goleveldb -c .
 
 
-#driver_cfgtx.sh
+#driver_cfgtx_x.sh
 
 The script is used to create configtx.yml.
 
 ##Usage
-    ./driver_cfgtx.sh [opt] [value] 
+    ./driver_cfgtx_x.sh [opt] [value] 
 
     options:
-
        -o: number of orderers, default=1
+       -k: number of kafka, default=0
        -p: number of peers per organiztion, default=1
        -h: hash type, default=SHA2
        -r: number of organization, default=1
        -s: security service type, default=256
        -t: orderer service [solo|kafka], default=solo
-       -f: profile string, default=testOrg
+       -f: profile name, default=testOrg
+       -b: MSP directory, default=/mnt/crypto-config
+       -w: host ip 1, default=0.0.0.0
 
-#Example
-    ./driver_cfgtx.sh -o 2 -p 3 -r 2 -h SHA2 -s 256 -t kafka
+
+##Example:"
+    ./driver_cfgtx.sh -o 1 -k 1 -p 2 -r 6 -h SHA2 -s 256 -t kafka -b /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/ -w 10.120.223.35
+
+
 
 #configtx.yaml-in
 This is a sample of configtx.yaml to be used to generate the desired configtx.yml. The key words in the sample file are:
@@ -88,7 +98,7 @@ This is a sample of configtx.yaml to be used to generate the desired configtx.ym
 + OrdererType: used for the orderer service type
 
 #driver_GenOpt.sh
-The script is used to create a docker-compose.yml and launch the network with specified number of peers, orderers, orderer type etc.
+The script is used to create a docker-compose.yml and launch the network with specified number of peers, orderers, orderer service type etc.
 
 ##Usage
     driver_GenOpt.sh [opt] [value]
@@ -99,6 +109,9 @@ The script is used to create a docker-compose.yml and launch the network with sp
        -p: number of peers
        -o: number of orderers
        -k: number of brokers
+        -r: number of organiztions
+        -F: local MSP base directory, default=/root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config
+        -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config
 
        peer environment variables
        -l: core logging level [(default = not set)|CRITICAL|ERROR|WARNING|NOTICE|INFO|DEBUG]
@@ -111,18 +124,40 @@ The script is used to create a docker-compose.yml and launch the network with sp
 
 
 ##Example
-    ./driver_GenOpt.sh -p 4 -o 1 -k 1 -t kafka -d goleveldb
+    ./driver_GenOpt.sh -a create -p 2 -r 2 -o 1 -k 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config
 
 
 ##IP address and port
 
-The user needs to specify the IP addresses and ports of orderer, peer, event in network.json.
+All IP addresses and ports of orderer, peer, event hub are specified in network.json.
+
+    "ordererAddress": "0.0.0.0",
+    "ordererPort": "7050",
+    "couchdbAddress": "0.0.0.0",
+    "couchdbPort": "5984",
+    "vp0Address": "0.0.0.0",
+    "vp0Port": "7061",
+    "evtAddress": "0.0.0.0",
+    "evtPort": "9061",
+
 
 ##Images
 
 All images (peer, kafka, and orderer etc) path (location) are specified in network.json
 
+        "zookeeper": {
+            "image": "hyperledger/fabric-zookeeper",
 
 
+        "kafka": {
+            "image": "hyperledger/fabric-kafka",
+
+
+        "orderer": {
+            "image": "hyperledger/fabric-orderer",
+
+
+        "peer": {
+            "image": "hyperledger/fabric-peer",
 
 

@@ -122,7 +122,7 @@ while getopts ":o:p:s:h:r:t:f:b:w:x:y:z:v:" opt; do
     v)
       k=$[ k + 1 ]
       OrgArray[$k]=$OPTARG
-      echo "k:  $k, ${#arr[@]}, OrgArray=${OrgArray[@]}"
+      echo "k:  $k, ${#OrgArray[@]}, OrgArray=${OrgArray[@]}"
       ;;
 
     # else

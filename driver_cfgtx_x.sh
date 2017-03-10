@@ -1,13 +1,10 @@
 #!/bin/bash
 
 #
-# usage: ./driver_cfgtx.sh [opt] [value]
-# example:
-#    ./driver_cfgtx.sh -o 1 -p 2 -r 6 -h SHA2 -s 256 -t kafka -b /mnt/crypto-config -w 9.47.152.126 -x 9.47.152.125 -y 9.47.152.124 -z 20000 -v 1 -v 3
+# usage: ./driver_cfgtx_x.sh [opt] [value]
 #
 
 HostIP1="0.0.0.0"
-HostIP2="0.0.0.0"
 HostPort=7050
 ordererPort=5005
 kafkaPort=9092
@@ -26,12 +23,9 @@ function printHelp {
    echo "    -f: profile name, default=testOrg"
    echo "    -b: MSP directory, default=/mnt/crypto-config"
    echo "    -w: host ip 1, default=0.0.0.0"
-   echo "    -x: Kafka B ip, default=0.0.0.0"
-   echo "    -y: host ip 2, default=0.0.0.0"
-   echo "    -z: host port, default=7050"
    echo " "
    echo "Example:"
-   echo " ./driver_cfgtx.sh -o 1 -p 2 -r 6 -h SHA2 -s 256 -t kafka -b /mnt/crypto-config -w 9.47.152.126 -x 9.47.152.125 -y 9.47.152.124 -z 20000 -v 1 -v 3"
+   echo " ./driver_cfgtx_x.sh -o 1 -k 1 -p 2 -r 2 -k 1 -h SHA2 -s 256 -t kafka -b /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/ -w 10.120.223.35 -v 1 -v 3"
    exit
 }
 
@@ -95,7 +89,7 @@ PROFILE_STRING="testOrg"
 MSPBaseDir="/root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config"
 
 k=0
-while getopts ":o:k:p:s:h:r:t:f:b:w:x:y:z:v:" opt; do
+while getopts ":o:k:p:s:h:r:t:f:b:w:v:" opt; do
   case $opt in
     # number of orderers
     o)
@@ -153,30 +147,10 @@ while getopts ":o:k:p:s:h:r:t:f:b:w:x:y:z:v:" opt; do
       echo "HostIP1:  $HostIP1"
       ;;
 
-    x)
-      KafkaBIP=$OPTARG
-      echo "KafkaIP:  $KafkaIP"
-      ;;
-
-    y)
-      HostIP2=$OPTARG
-      OrdererIP=$OPTARG
-      KafkaCIP=$OPTARG
-      echo "HostIP2:  $HostIP2"
-      ;;
-
-    z)
-      BasePort=$OPTARG
-      HostPort=$[ BasePort + 21 ]
-      OrdererPort=$[ BasePort + 5 ]
-      KafkaPort=$[ BasePort + 3 ]
-      echo "BasePort: $BasePort, HostPort: $HostPort, OrdererPort: $OrdererPort, KafkaPort: $KafkaPort"
-      ;;
-
     v)
       k=$[ k + 1 ]
       OrgArray[$k]=$OPTARG
-      echo "k:  $k, ${#arr[@]}, OrgArray=${OrgArray[@]}"
+      echo "k:  $k, ${#OrgArray[@]}, OrgArray=${OrgArray[@]}"
       ;;
 
     # else
@@ -194,7 +168,7 @@ done
 
 echo "nOrderer=$nOrderer, peersPerOrg=$peersPerOrg, ordServType=$ordServType, nOrg=$nOrg, hashType=$hashType, SecType=$SecType"
 echo "MSPBaseDir=$MSPBaseDir"
-echo "Host IP=$HostIP1, $HostIP2, Port=$HostPort"
+echo "Host IP=$HostIP1, Port=$HostPort"
 echo "Kafka IP=$KafkaAIP, $KafkaBIP, $KafkaCIP"
 echo "inFile=$inFile"
 echo "cfgOutFile=$cfgOutFile"
@@ -318,8 +292,6 @@ do
              echo "        AnchorPeers:" >> $cfgOutFile
              echo "            - Host: $HostIP1" >> $cfgOutFile
              echo "              Port: $tmpPort" >> $cfgOutFile
-#             echo "            - Host: $HostIP2" >> $cfgOutFile
-#             echo "              Port: $tmpPort" >> $cfgOutFile
              echo "" >> $cfgOutFile
 
           done
