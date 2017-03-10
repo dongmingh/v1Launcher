@@ -2,8 +2,9 @@
 
 
 # default directories
-FabricDir="/root/gopath/src/github.com/hyperledger/fabric"
-MSPDir="/root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config"
+FabricDir="$GOPATH//src/github.com/hyperledger/fabric"
+ordererDir="$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations"
+MSPDir="$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config"
 SRCMSPDir="/opt/hyperledger/fabric/msp/crypto-config"
 
 function printHelp {
@@ -140,10 +141,10 @@ echo " nOrg=$nOrg, nPeersPerOrg=$nPeersPerOrg, ledgerDB=$ledgerDB, hashType=$has
 CWD=$PWD
 echo "current working directory: $CWD"
 echo "GOPATH=$GOPATH"
-
-        ####################################
-        #     execute cryptogen            #
-        ####################################
+echo " "
+echo "        ####################################################### "
+echo "        #                execute cryptogen                    # "
+echo "        ####################################################### "
 echo "generate crypto ..."
 cd $CryptoBaseDir
 # remove existing crypto-config
@@ -157,9 +158,11 @@ CRYPTOEXE=$CryptoBaseDir/cryptogen
 echo "$CRYPTOEXE -baseDir $CryptoBaseDir -ordererNodes $nOrderer -peerOrgs $nOrg -peersPerOrg $nPeersPerOrg"
 $CRYPTOEXE -baseDir $CryptoBaseDir -ordererNodes $nOrderer -peerOrgs $nOrg -peersPerOrg $nPeersPerOrg
 
-        ####################################
-        #     generate configtx.yaml       #
-        ####################################
+echo " "
+echo "        ####################################################### "
+echo "        #                 generate configtx.yaml              # "
+echo "        ####################################################### "
+echo " "
 echo "generate configtx.yaml ..."
 cd $CWD
 echo "current working directory: $PWD"
@@ -167,9 +170,11 @@ echo "current working directory: $PWD"
 echo "./driver_cfgtx_x.sh -o $nOrderer -k $nKafka -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $PROFILE_STRING -w $HostIP1"
 ./driver_cfgtx_x.sh -o $nOrderer -k $nKafka -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $PROFILE_STRING -w $HostIP1
 
-        ####################################
-        #     create orderer.block         #
-        ####################################
+echo " "
+echo "        ####################################################### "
+echo "        #     create orderer.block and channel blocks         # "
+echo "        ####################################################### "
+echo " "
 CFGGenDir=$GOPATH/src/github.com/hyperledger/fabric/build/bin
 CFGEXE=$CFGGenDir"/configtxgen"
 cp configtx.yaml $FabricDir"/common/configtx/tool"
@@ -177,19 +182,22 @@ cp configtx.yaml $FabricDir"/common/configtx/tool"
 if [ ! -f $CFGEXE ]; then
     cd $FabricDir
     make configtxgen
+    cd $CWD
 fi
 #create orderer blocks
-$CFGEXE -profile $PROFILE_STRING -outputBlock $FabricDir"/common/tools/cryptogen/crypto-config/ordererOrganizations/orderer.block" 
+$CFGEXE -profile $PROFILE_STRING -outputBlock $ordererDir"/orderer.block" 
 
 #create channels blocks
 for (( i=1; i<=$nChannel; i++ ))
 do
-    $CFGEXE -profile $PROFILE_STRING -channelID $PROFILE_STRING"$i" -outputCreateChannelTx $FabricDir"/common/tools/cryptogen/crypto-config/ordererOrganizations/"$PROFILE_STRING$i".block"
+    $CFGEXE -profile $PROFILE_STRING -channelID $PROFILE_STRING"$i" -outputCreateChannelTx $ordererDir"/"$PROFILE_STRING$i".block"
 done
 
-        ####################################
-        #    bring up network              #
-        ####################################
+echo " "
+echo "        ####################################################### "
+echo "        #                   bring up network                  # "
+echo "        ####################################################### "
+echo " "
 echo "generate docker-compose.yml ..."
 echo "current working directory: $PWD"
 nPeers=$[ nPeersPerOrg * nOrg ]
