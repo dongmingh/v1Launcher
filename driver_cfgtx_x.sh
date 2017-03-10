@@ -86,7 +86,7 @@ ordServType="solo"
 hashType="SHA2"
 SecType="256"
 PROFILE_STRING="testOrg"
-MSPBaseDir="/root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config"
+MSPBaseDir=$GOPATH"/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config"
 
 k=0
 while getopts ":o:k:p:s:h:r:t:f:b:w:v:" opt; do
