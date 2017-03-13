@@ -110,12 +110,12 @@ while getopts ":d:f:h:k:n:o:p:r:t:s:c:w:F:G:" opt; do
 
     F)
       MSPDir=$OPTARG
-      export MSPDir=$MSPDir
+      export MSPDIR=$MSPDir
       echo "MSPDir: $MSPDir"
       ;;
     G)
       SRCMSPDir=$OPTARG
-      export SRCMSPDir=$SRCMSPDir
+      export SRCMSPDIR=$SRCMSPDir
       echo "SRCMSPDir: $SRCMSPDir"
       ;;
 
