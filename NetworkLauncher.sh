@@ -23,7 +23,7 @@ function printHelp {
    echo "    -t: ledger orderer service type [solo|kafka], default=solo"
    echo "    -c: crypto directory, default=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen"
    echo "    -w: host ip 1, default=0.0.0.0"
-   echo "    -F: local MSP base directory, default=/root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config"
+   echo "    -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config"
    echo "    -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config"
    echo " "
    echo " example: "
@@ -109,14 +109,14 @@ while getopts ":d:f:h:k:n:o:p:r:t:s:c:w:F:G:" opt; do
       ;;
 
     F)
-      MSPDIR=$OPTARG
-      export MSPDIR=$MSPDIR
-      echo "MSPDIR: $MSPDIR"
+      MSPDir=$OPTARG
+      export MSPDir=$MSPDir
+      echo "MSPDir: $MSPDir"
       ;;
     G)
-      SRCMSPDIR=$OPTARG
-      export SRCMSPDIR=$SRCMSPDIR
-      echo "SRCMSPDIR: $SRCMSPDIR"
+      SRCMSPDir=$OPTARG
+      export SRCMSPDir=$SRCMSPDir
+      echo "SRCMSPDir: $SRCMSPDir"
       ;;
 
     # else
