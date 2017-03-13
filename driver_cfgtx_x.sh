@@ -25,7 +25,7 @@ function printHelp {
    echo "    -w: host ip 1, default=0.0.0.0"
    echo " "
    echo "Example:"
-   echo " ./driver_cfgtx_x.sh -o 1 -k 1 -p 2 -r 2 -k 1 -h SHA2 -s 256 -t kafka -b /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/ -w 10.120.223.35 -v 1 -v 3"
+   echo " ./driver_cfgtx_x.sh -o 1 -k 1 -p 2 -r 2 -h SHA2 -s 256 -t kafka -b /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/ -w 10.120.223.35 -v 1 -v 3"
    exit
 }
 
