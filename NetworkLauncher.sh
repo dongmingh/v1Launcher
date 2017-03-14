@@ -190,7 +190,7 @@ $CFGEXE -profile $PROFILE_STRING -outputBlock $ordererDir"/orderer.block"
 #create channels blocks
 for (( i=1; i<=$nChannel; i++ ))
 do
-    $CFGEXE -profile $PROFILE_STRING -channelID $PROFILE_STRING"$i" -outputCreateChannelTx $ordererDir"/"$PROFILE_STRING$i".block"
+    $CFGEXE -profile $PROFILE_STRING -channelID $PROFILE_STRING"$i" -outputCreateChannelTx $ordererDir"/"$PROFILE_STRING$i".tx"
 done
 
 echo " "
