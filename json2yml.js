@@ -342,7 +342,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                             fs.appendFileSync(dFile, buff);
                                     } else if ( lvl3_key[m] == 'ORDERER_GENERAL_LOCALMSPDIR' ) {
                                             var t = v+1;
-                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + ordererMSPDir + '/ordererOrg' + '' +t+'/orderers/ordererOrg'+t+'orderer'+t + '\n';
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + ordererMSPDir + '/ordererOrg' + '' +t+'/orderers/ordererOrg'+t+'Orderer'+t + '\n';
                                             fs.appendFileSync(dFile, buff);
                                     } else {
                                         buff = '  ' + '    - ' + lvl3_key[m] + '=' +lvl2_obj[lvl3_key[m]] + '\n';
