@@ -27,7 +27,7 @@ function printHelp {
    echo "    -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config"
    echo " "
    echo " example: "
-   echo " ./NetworkLauncher.sh -o 1 -r 2 -p 2 -k 1 -n 5 -t kafka -f testOrg -w 10.120.223.35 "
+   echo " ./NetworkLauncher.sh -o 1 -r 2 -p 2 -k 1 -n 1 -t kafka -f testOrg -w 10.120.223.35 "
    exit
 }
 
@@ -172,7 +172,7 @@ echo "./driver_cfgtx_x.sh -o $nOrderer -k $nKafka -p $nPeersPerOrg -r $nOrg -h $
 
 echo " "
 echo "        ####################################################### "
-echo "        #     create orderer.block and channel blocks         # "
+echo "        #             create orderer.block                    # "
 echo "        ####################################################### "
 echo " "
 CFGGenDir=$GOPATH/src/github.com/hyperledger/fabric/build/bin
@@ -185,12 +185,22 @@ if [ ! -f $CFGEXE ]; then
     cd $CWD
 fi
 #create orderer blocks
-$CFGEXE -profile $PROFILE_STRING -outputBlock $ordererDir"/orderer.block" 
+ordBlock=$ordererDir"/orderer.block"
+echo "$CFGEXE -profile $PROFILE_STRING -outputBlock $ordBlock"
+$CFGEXE -profile $PROFILE_STRING -outputBlock $ordBlock
 
-#create channels blocks
+#create channels configuration transaction
+echo " "
+echo "        ####################################################### "
+echo "        #     create channel configuration transaction        # "
+echo "        ####################################################### "
+echo " "
 for (( i=1; i<=$nChannel; i++ ))
 do
-    $CFGEXE -profile $PROFILE_STRING -channelID $PROFILE_STRING"$i" -outputCreateChannelTx $ordererDir"/"$PROFILE_STRING$i".tx"
+    channelTx=$ordererDir"/"$PROFILE_STRING$i".tx"
+    #channelTx=$ordererDir"/mychannel.tx"
+    echo "$CFGEXE -profile $PROFILE_STRING -channelID $PROFILE_STRING"$i" -outputCreateChannelTx $channelTx"
+    $CFGEXE -profile $PROFILE_STRING -channelID $PROFILE_STRING"$i" -outputCreateChannelTx $channelTx
 done
 
 echo " "

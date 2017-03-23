@@ -253,7 +253,8 @@ do
              echo "    - &$tmp" >> $cfgOutFile
              echo "        Name: $tmp" >> $cfgOutFile
              echo "        ID: $tt" >> $cfgOutFile
-             ordDir=$MSPBaseDir"/ordererOrganizations/ordererOrg"$i"/orderers/ordererOrg"$i"orderer"$i
+             ordDir=$MSPBaseDir"/ordererOrganizations/ordererOrg"$i"/msp"
+             #ordDir=$MSPBaseDir"/ordererOrganizations/ordererOrg"$i"/orderers/ordererOrg"$i"orderer"$i
              echo "        MSPDir: $ordDir" >> $cfgOutFile
 
              echo "" >> $cfgOutFile
