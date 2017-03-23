@@ -19,7 +19,7 @@ Profiles:
         Application:
             <<: *ApplicationDefaults
             Organizations:
-                - *Org0
+                - *PeerOrg
 
 #    # SampleInsecureKafka defines a configuration that differs from the
 #    # SampleInsecureSolo one only in that is uses the Kafka-based orderer.
@@ -44,7 +44,7 @@ Organizations:
     # in production but may be used as a template for other definitions
     - &OrdererOrg
 
-    - &Org0
+    - &PeerOrg
 
 ################################################################################
 #

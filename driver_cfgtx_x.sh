@@ -15,7 +15,7 @@ function printHelp {
    echo " ./driver_cfgtx.sh [opt] [value] "
    echo "    -o: number of orderers, default=1"
    echo "    -k: number of kafka, default=0"
-   echo "    -p: number of peers per organiztion, default=1"
+   echo "    -p: number of peers per organization, default=1"
    echo "    -h: hash type, default=SHA2"
    echo "    -r: number of organization, default=1"
    echo "    -s: security service type, default=256"
@@ -109,7 +109,6 @@ while getopts ":o:k:p:s:h:r:t:f:b:w:v:" opt; do
       echo "peersPerOrg: $peersPerOrg"
       ;;
 
-    # type of orderer service
     h)
       hashType=$OPTARG
       echo "hashType:  $hashType"
@@ -197,11 +196,11 @@ do
     #echo "$line"
     #echo "t1:t2=$t1:$t2"
       #Profiles
-      if [ "$t2" == "*Org0" ]; then
+      if [ "$t2" == "*PeerOrg" ]; then
           for (( i=1; i<=${#OrgArray[@]}; i++ ))
           do
               tmp=${OrgArray[$i]}
-              echo "                - *PeerOrg$tmp" >> $cfgOutFile
+              echo "                - $t2$tmp" >> $cfgOutFile
           done
 
       elif [ "$t1" == "OrdererType:" ]; then
@@ -225,27 +224,26 @@ do
 
       elif [ "$t1" == "Brokers:" ]; then
           echo "        $t1" >> $cfgOutFile
-          #echo "             - $peerIP":"$kafkaPort, $peerIP":"$[ kafkaPort + 1 ], $peerIP":"$[ kafkaPort + 2 ]" >> $cfgOutFile
-          tmp=$peerIP":"$kafkaPort
-          tmpPort=$kafkaPort
-          for (( i=2; i<=$nKafka; i++  ))
+          for (( i=0; i<$nKafka; i++  ))
           do
-              j=$[ i - 1 ]
-              tmpPort=$[ kafkaPort + j ]
-              tmp=$tmp", "$peerIP":"$tmpPort
+              echo "             - kafka"$i":"$kafkaPort >> $cfgOutFile
           done
-          echo "             - $tmp" >> $cfgOutFile
 
       elif [ "$t2" == "*OrdererOrg" ]; then
-          echo "OrdererOrg ... "
-          for (( i=1; i<=$nOrderer; i++ ))
+          echo "*OrdererOrg ... "
+          #Save this idea for later; the cryptogen tool version only supports one OrdererOrg for now.
+          #for (( i=1; i<=$nOrderer; i++ ))
+          for (( i=1; i<=1; i++ ))
           do
              echo "                - $t2$i" >> $cfgOutFile
           done
 
       elif [ "$t2" == "&OrdererOrg" ]; then
-          echo "OrdererOrg ... "
-          for (( i=1; i<=$nOrderer; i++ ))
+          echo "&OrdererOrg ... "
+          #Save this idea for later; the cryptogen tool version only supports one OrdererOrg for now.
+          #We will have to figure out which Orderers are in which Orgs - the same way cryptogen does it.
+          #for (( i=1; i<=$nOrderer; i++ ))
+          for (( i=1; i<=1; i++ ))
           do
              j=$[ peersPerOrg * ( i - 1 ) + 1 ]
              tmp="OrdererOrg"$i
@@ -268,7 +266,7 @@ do
              echo "" >> $cfgOutFile
 
           done
-      elif [ "$t2" == "&Org0" ]; then
+      elif [ "$t2" == "&PeerOrg" ]; then
           for (( i=1; i<=$nOrg; i++ ))
           do
              j=$[ peersPerOrg * ( i - 1 ) + 1 ]
