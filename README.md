@@ -11,6 +11,14 @@ The network Launcher can execute the following task:
 
 The usages of each script is given below so that they can be executed separately as needed.  However, the script, v1launcher.sh, is designed to execute all tasks sequentially.
 
+##Code Base
+
+Release v1.0.0-alpha:
+
+- fabric commit level: fa3d88cde177750804c7175ae000e0923199735c
+- fabric-sdk-node commit level: 196d0484c884ab894374c73df89bfe047bcc9f00
+- fabric-ca commit level: 29385879bc2931cce9ec833acf796129908b72fb
+
 
 #NetworkLauncher.sh
 
@@ -21,6 +29,7 @@ This is the main script to execute all tasks.
 
     ./NetworkLauncher.sh [opt] [value]
        options:
+         -z: number of CAs
          -d: ledger database type, default=goleveldb
          -f: profile string, default=testOrg
          -h: hash type, default=SHA2
@@ -38,7 +47,7 @@ This is the main script to execute all tasks.
 
     
 ##Example:
-    ./NetworkLauncher.sh -o 1 -r 2 -p 2 -k 1 -n 5 -t kafka -f testOrg -w 10.120.223.35
+    ./NetworkLauncher.sh -z 2 -o 1 -r 2 -p 2 -k 1 -n 5 -t kafka -f testOrg -w 10.120.223.35
 
 The above command will invoke cryptogen, cfgtxgen, and launch network.
 
@@ -106,6 +115,7 @@ The script is used to create a docker-compose.yml and launch the network with sp
     options:
        network variables
        -a: action [create|add]
+       -z: number of CAs
        -p: number of peers
        -o: number of orderers
        -k: number of brokers
@@ -124,13 +134,15 @@ The script is used to create a docker-compose.yml and launch the network with sp
 
 
 ##Example
-    ./driver_GenOpt.sh -a create -p 2 -r 2 -o 1 -k 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config
+    ./driver_GenOpt.sh -a create -z 2 -p 2 -r 2 -o 1 -k 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config
 
 
 ##IP address and port
 
 All IP addresses and ports of orderer, peer, event hub are specified in network.json.
 
+    "caAddress": "0.0.0.0",
+    "caPort": "7054",
     "ordererAddress": "0.0.0.0",
     "ordererPort": "7050",
     "couchdbAddress": "0.0.0.0",
@@ -144,6 +156,9 @@ All IP addresses and ports of orderer, peer, event hub are specified in network.
 ##Images
 
 All images (peer, kafka, and orderer etc) path (location) are specified in network.json
+
+        "ca": {
+             "image": "hyperledger/fabric-ca",
 
         "zookeeper": {
             "image": "hyperledger/fabric-zookeeper",

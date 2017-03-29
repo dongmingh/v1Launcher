@@ -11,6 +11,7 @@ function printHelp {
 
    echo "Usage: "
    echo " ./NetworkLauncher.sh [opt] [value] "
+   echo "    -z: number of ca, default=0"
    echo "    -d: ledger database type, default=goleveldb"
    echo "    -f: profile string, default=testOrg"
    echo "    -h: hash type, default=SHA2"
@@ -27,7 +28,7 @@ function printHelp {
    echo "    -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config"
    echo " "
    echo " example: "
-   echo " ./NetworkLauncher.sh -o 1 -r 2 -p 2 -k 1 -n 1 -t kafka -f testOrg -w 10.120.223.35 "
+   echo " ./NetworkLauncher.sh -o 1 -z 2 -r 2 -p 2 -k 1 -n 1 -t kafka -f testOrg -w 10.120.223.35 "
    exit
 }
 
@@ -35,6 +36,7 @@ function printHelp {
 PROFILE_STRING="testOrg"
 ordServType="solo"
 nKafka=0
+nCA=0
 nOrderer=1
 nOrg=1
 nPeersPerOrg=1
@@ -45,9 +47,13 @@ CryptoBaseDir=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen
 nChannel=1
 
 
-while getopts ":d:f:h:k:n:o:p:r:t:s:c:w:F:G:" opt; do
+while getopts ":z:d:f:h:k:n:o:p:r:t:s:c:w:F:G:" opt; do
   case $opt in
     # peer environment options
+    z)
+      nCA=$OPTARG
+      echo "number of kafka: $nCA"
+      ;;
     d)
       ledgerDB=$OPTARG
       echo "ledger state database type: $ledgerDB"
@@ -65,7 +71,7 @@ while getopts ":d:f:h:k:n:o:p:r:t:s:c:w:F:G:" opt; do
 
     k)
       nKafka=$OPTARG
-      echo "number of kafka: $kafka"
+      echo "number of kafka: $nKafka"
       ;;
 
     n)
@@ -212,6 +218,6 @@ echo "generate docker-compose.yml ..."
 echo "current working directory: $PWD"
 nPeers=$[ nPeersPerOrg * nOrg ]
 echo "number of peers: $nPeers"
-echo "./driver_GenOpt.sh -a create -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir"
-./driver_GenOpt.sh -a create -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir
+echo "./driver_GenOpt.sh -a create -z $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir"
+./driver_GenOpt.sh -a create -z $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir
 

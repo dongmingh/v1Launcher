@@ -15,6 +15,7 @@ function printHelp {
    echo "       -o: number of orderers "
    echo "       -k: number of brokers "
    echo "       -r: number of organiztions "
+   echo "       -z: number of ca "
    echo "       -F: local MSP base directory, default=/root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config"
    echo "       -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config"
    echo " "
@@ -28,7 +29,7 @@ function printHelp {
    echo "       -c: batch timeout [10s|max secs before send an unfilled batch] "
    echo " "
    echo "Example:"
-   echo "   ./driver_GenOpt.sh -a create -p 2 -r 2 -o 1 -k 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config "
+   echo "   ./driver_GenOpt.sh -a create -z 2 -p 2 -r 2 -o 1 -k 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config "
    echo " "
    exit
 }
@@ -37,9 +38,13 @@ function printHelp {
 nBroker=0
 nPeerPerOrg=1
 
-while getopts ":l:d:b:c:t:a:o:k:p:r:F:G:" opt; do
+while getopts ":z:l:d:b:c:t:a:o:k:p:r:F:G:" opt; do
   case $opt in
     # peer environment options
+    z)
+      nCA=$OPTARG
+      echo "number of CA: $nCA"
+      ;;
     l)
       CORE_LOGGING_LEVEL=$OPTARG
       export CORE_LOGGING_LEVEL=$CORE_LOGGING_LEVEL
@@ -163,14 +168,35 @@ fi
 
 ## echo "N1=$N1 VP=$VP nPeerPerOrg=$nPeerPerOrg VPN=$VPN"
 
-node json2yml.js $jsonFILE $nPeerPerOrg $nOrderer $nBroker $nOrg $dbType
+echo "node json2yml.js $jsonFILE $nPeerPerOrg $nOrderer $nBroker $nOrg $dbType $nCA"
+
+node json2yml.js $jsonFILE $nPeerPerOrg $nOrderer $nBroker $nOrg $dbType $nCA
+
+#fix CA _sk in docker-compose.yml
+CWD=$PWD
+echo $CWD
+echo "GOPATH: $GOPATH"
+
+for (( i=0; i<$nCA; i++ ))
+do
+    j=$[ i + 1 ]
+    Dir=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config/peerOrganizations/peerOrg$j"/ca"
+    cd $Dir
+    tt=`ls *sk`
+
+    cd $CWD
+    sed '-i' "s/CA_SK$i/$tt/g" docker-compose.yml
+
+done
 
 ## sed 's/-x86_64/TEST/g' docker-compose.yml > ss.yml
 ## cp ss.yml docker-compose.yml
 # create network
 if [ $Req == "create" ]; then
 
-   docker-compose -f docker-compose.yml up -d --force-recreate cli $VPN
+   #docker-compose -f docker-compose.yml up -d --force-recreate cli $VPN
+   docker-compose -f docker-compose.yml up -d --force-recreate
+   #docker-compose -f docker-compose.yml up -d --force-recreate $VPN
    ##docker-compose -f docker-compose.yml up -d --force-recreate $VPN
    for ((i=1; i<$nOrderer; i++))
    do

@@ -1,4 +1,6 @@
 {
+    "caAddress": "0.0.0.0",
+    "caPort": "7054",
     "ordererAddress": "0.0.0.0",
     "ordererPort": "5005",
     "couchdbAddress": "0.0.0.0",
@@ -13,6 +15,20 @@
     "networks":
             "bridge",
     "services": {
+        "ca": {
+            "image": "hyperledger/fabric-ca",
+            "environment": {
+                "FABRIC_CA_HOME":"/etc/hyperledger/fabric-ca-server"
+            },
+            "ports": [
+                "caPort:7054"
+            ],
+            "command": "sh -c 'fabric-ca-server start --ca.certfile",
+            "volumes": [
+                 "/root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config/peerOrganizations/peerOrg1/ca/:/etc/hyperledger/fabric-ca-server-config"
+            ],
+            "container_name": "ca_peerOrg1"
+        },
         "zookeeper": {
             "image": "hyperledger/fabric-zookeeper",
             "container_name": "zookeeper",
