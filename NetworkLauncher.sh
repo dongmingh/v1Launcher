@@ -23,7 +23,7 @@ function printHelp {
    echo "    -s: security type, default=256"
    echo "    -t: ledger orderer service type [solo|kafka], default=solo"
    echo "    -c: crypto directory, default=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen"
-   echo "    -w: host ip 1, default=0.0.0.0"
+   echo "    -w: host ip, default=0.0.0.0"
    echo "    -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config"
    echo "    -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config"
    echo " "
@@ -45,6 +45,7 @@ hashType="SHA2"
 secType="256"
 CryptoBaseDir=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen
 nChannel=1
+HostIP1="0.0.0.0"
 
 
 while getopts ":z:d:f:h:k:n:o:p:r:t:s:c:w:F:G:" opt; do
@@ -52,7 +53,7 @@ while getopts ":z:d:f:h:k:n:o:p:r:t:s:c:w:F:G:" opt; do
     # peer environment options
     z)
       nCA=$OPTARG
-      echo "number of kafka: $nCA"
+      echo "number of CA: $nCA"
       ;;
     d)
       ledgerDB=$OPTARG
@@ -138,6 +139,10 @@ while getopts ":z:d:f:h:k:n:o:p:r:t:s:c:w:F:G:" opt; do
 
   esac
 done
+
+if [ $nCA -eq 0 ]; then
+   nCA=#nOrg
+fi
 
 # sanity check
 echo " PROFILE_STRING=$PROFILE_STRING, ordServType=$ordServType, nKafka=$nKafka, nOrderer=$nOrderer"
