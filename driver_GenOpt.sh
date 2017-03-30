@@ -97,7 +97,7 @@ while getopts ":z:l:d:b:c:t:a:o:k:p:r:F:G:" opt; do
       ;;
     p)
       nPeerPerOrg=$OPTARG
-      echo "# of peer per org: $nPeerperOrg"
+      echo "# of peer per org: $nPeerPerOrg"
       ;;
 
     r)

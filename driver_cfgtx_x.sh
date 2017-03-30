@@ -82,7 +82,6 @@ nKafka=0
 ordServType="solo"
 SecTypenOrderer=1
 peersPerOrg=1
-ordServType="solo"
 hashType="SHA2"
 SecType="256"
 PROFILE_STRING="testOrg"
