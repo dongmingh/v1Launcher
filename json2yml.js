@@ -365,7 +365,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                             // This looks wrong; how would we get ordererOrg1Orderer2 ? 
                                             // buff = '  ' + '    - ' + lvl3_key[m] + '=' + ordererMSPDir + '/ordererOrg' + '' +t+'/orderers/ordererOrg'+t+'orderer'+t + '\n';
                                             // For now crytogen tool only puts all orderers into one ordererOrg1 anyways, so:
-                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + ordererMSPDir + '/ordererOrg1/orderers/ordererOrg1orderer'+t + '\n';
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + ordererMSPDir + '/ordererOrg1/orderers/ordererOrg1Orderer'+t + '\n';
                                             fs.appendFileSync(dFile, buff);
                                     } else {
                                         buff = '  ' + '    - ' + lvl3_key[m] + '=' +lvl2_obj[lvl3_key[m]] + '\n';

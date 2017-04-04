@@ -6,16 +6,16 @@ Network Launcher
 The network Launcher can execute the following task:
 
 1. generate crypto using cryptogen
-2. create confitx.yml
-3. create a docker-compose.yml and launch a network
+2. create configtx.yml
+3. create orderer block
+4. create channel configuration transaction
+5. create a docker-compose.yml and launch a network
 
 The usages of each script is given below so that they can be executed separately as needed.  However, the script, v1launcher.sh, is designed to execute all tasks sequentially.
 
 ##Code Base
 
-Release v1.0.0-alpha:
-
-- fabric commit level: fa3d88cde177750804c7175ae000e0923199735c
+- fabric commit level: 835712ffa10624d9dd2b59cffef6eccf8a37ecef
 - fabric-sdk-node commit level: 196d0484c884ab894374c73df89bfe047bcc9f00
 - fabric-ca commit level: 29385879bc2931cce9ec833acf796129908b72fb
 
