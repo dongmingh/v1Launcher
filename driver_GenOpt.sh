@@ -8,7 +8,7 @@
 
 function printHelp {
    echo "Usage: "
-   echo " ./driver_ord.sh [opt] [value] "
+   echo " ./driver_GenOpt.sh [opt] [value] "
    echo "    network variables"
    echo "       -a: action [create|add] "
    echo "       -p: number of peers per organization"

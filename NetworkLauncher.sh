@@ -13,7 +13,7 @@ function printHelp {
    echo " ./NetworkLauncher.sh [opt] [value] "
    echo "    -z: number of ca, default=0"
    echo "    -d: ledger database type, default=goleveldb"
-   echo "    -f: profile string, default=testOrg"
+   echo "    -f: profile string, default=test"
    echo "    -h: hash type, default=SHA2"
    echo "    -k: number of kafka, default=solo"
    echo "    -n: number of channels, default=1"
@@ -34,7 +34,7 @@ function printHelp {
 }
 
 #defaults
-PROFILE_STRING="testOrg"
+PROFILE_STRING="test"
 ordServType="solo"
 nKafka=0
 nCA=0
@@ -141,9 +141,9 @@ while getopts ":z:d:f:h:k:n:o:p:r:t:s:c:w:F:G:" opt; do
   esac
 done
 
-if [ $nCA -eq 0 ]; then
-   nCA=#nOrg
-fi
+#if [ $nCA -eq 0 ]; then
+#   nCA=$nOrg
+#fi
 
 # sanity check
 echo " PROFILE_STRING=$PROFILE_STRING, ordServType=$ordServType, nKafka=$nKafka, nOrderer=$nOrderer"

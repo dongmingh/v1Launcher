@@ -31,7 +31,7 @@ This is the main script to execute all tasks.
        options:
          -z: number of CAs
          -d: ledger database type, default=goleveldb
-         -f: profile string, default=testOrg
+         -f: profile string, default=test
          -h: hash type, default=SHA2
          -k: number of kafka, default=solo
          -n: number of channels, default=1
@@ -87,7 +87,6 @@ The script is used to create configtx.yml.
        -r: number of organization, default=1
        -s: security service type, default=256
        -t: orderer service [solo|kafka], default=solo
-       -f: profile name, default=testOrg
        -b: MSP directory, default=/mnt/crypto-config
        -w: host ip 1, default=0.0.0.0
 
@@ -119,9 +118,9 @@ The script is used to create a docker-compose.yml and launch the network with sp
        -p: number of peers
        -o: number of orderers
        -k: number of brokers
-        -r: number of organiztions
-        -F: local MSP base directory, default=/root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config
-        -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config
+       -r: number of organiztions
+       -F: local MSP base directory, default=/root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config
+       -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config
 
        peer environment variables
        -l: core logging level [(default = not set)|CRITICAL|ERROR|WARNING|NOTICE|INFO|DEBUG]
