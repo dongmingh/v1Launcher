@@ -28,7 +28,8 @@ function printHelp {
    echo "    -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config"
    echo " "
    echo " example: "
-   echo " ./NetworkLauncher.sh -o 1 -z 2 -r 2 -p 2 -k 1 -n 1 -t kafka -f testOrg -w 10.120.223.35 "
+   echo " ./NetworkLauncher.sh -o 1 -z 2 -r 2 -p 2 -k 1 -n 1 -t kafka -f test -w 10.120.223.35 "
+   echo " ./NetworkLauncher.sh -o 1 -z 2 -r 2 -p 2 -n 1 -f test -w 10.120.223.35 "
    exit
 }
 
@@ -148,6 +149,8 @@ fi
 echo " PROFILE_STRING=$PROFILE_STRING, ordServType=$ordServType, nKafka=$nKafka, nOrderer=$nOrderer"
 echo " nOrg=$nOrg, nPeersPerOrg=$nPeersPerOrg, ledgerDB=$ledgerDB, hashType=$hashType, secType=$secType"
 
+CHAN_PROFILE=$PROFILE_STRING"Channel"
+ORG_PROFILE=$PROFILE_STRING"Org"
 
 CWD=$PWD
 echo "current working directory: $CWD"
@@ -178,8 +181,8 @@ echo "generate configtx.yaml ..."
 cd $CWD
 echo "current working directory: $PWD"
 
-echo "./driver_cfgtx_x.sh -o $nOrderer -k $nKafka -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $PROFILE_STRING -w $HostIP1"
-./driver_cfgtx_x.sh -o $nOrderer -k $nKafka -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $PROFILE_STRING -w $HostIP1
+echo "./driver_cfgtx_x.sh -o $nOrderer -k $nKafka -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $ORG_PROFILE -w $HostIP1"
+./driver_cfgtx_x.sh -o $nOrderer -k $nKafka -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $ORG_PROFILE -w $HostIP1
 
 echo " "
 echo "        ####################################################### "
@@ -197,8 +200,8 @@ if [ ! -f $CFGEXE ]; then
 fi
 #create orderer blocks
 ordBlock=$ordererDir"/orderer.block"
-echo "$CFGEXE -profile $PROFILE_STRING -outputBlock $ordBlock"
-$CFGEXE -profile $PROFILE_STRING -outputBlock $ordBlock
+echo "$CFGEXE -profile $ORG_PROFILE -outputBlock $ordBlock"
+$CFGEXE -profile $ORG_PROFILE -outputBlock $ordBlock
 
 #create channels configuration transaction
 echo " "
@@ -208,10 +211,10 @@ echo "        ####################################################### "
 echo " "
 for (( i=1; i<=$nChannel; i++ ))
 do
-    channelTx=$ordererDir"/"$PROFILE_STRING$i".tx"
+    channelTx=$ordererDir"/"$CHAN_PROFILE$i".tx"
     #channelTx=$ordererDir"/mychannel.tx"
-    echo "$CFGEXE -profile $PROFILE_STRING -channelID $PROFILE_STRING"$i" -outputCreateChannelTx $channelTx"
-    $CFGEXE -profile $PROFILE_STRING -channelID $PROFILE_STRING"$i" -outputCreateChannelTx $channelTx
+    echo "$CFGEXE -profile $ORG_PROFILE -channelID $CHAN_PROFILE"$i" -outputCreateChannelTx $channelTx"
+    $CFGEXE -profile $ORG_PROFILE -channelID $CHAN_PROFILE"$i" -outputCreateChannelTx $channelTx
 done
 
 echo " "

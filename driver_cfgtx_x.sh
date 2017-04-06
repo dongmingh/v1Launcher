@@ -249,7 +249,8 @@ do
              tt="Orderer"$i"MSP"
              echo "    - &$tmp" >> $cfgOutFile
              echo "        Name: $tmp" >> $cfgOutFile
-             echo "        ID: $tt" >> $cfgOutFile
+             echo "        ID: $tmp" >> $cfgOutFile
+             #echo "        ID: $tt" >> $cfgOutFile
              ordDir=$MSPBaseDir"/ordererOrganizations/ordererOrg"$i"/msp"
              #ordDir=$MSPBaseDir"/ordererOrganizations/ordererOrg"$i"/orderers/ordererOrg"$i"orderer"$i
              echo "        MSPDir: $ordDir" >> $cfgOutFile
@@ -273,7 +274,8 @@ do
              echo "    - &$tt" >> $cfgOutFile
              tmp="Peer"$i"MSP"
              echo "        Name: $tt" >> $cfgOutFile
-             echo "        ID: $tmp" >> $cfgOutFile
+             echo "        ID: $tt" >> $cfgOutFile
+             #echo "        ID: $tmp" >> $cfgOutFile
              peerDir=$MSPBaseDir"/peerOrganizations/peerOrg"$i"/msp"
              echo "        MSPDir: $peerDir" >> $cfgOutFile
 

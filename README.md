@@ -15,9 +15,9 @@ The usages of each script is given below so that they can be executed separately
 
 ##Code Base
 
-- fabric commit level: 835712ffa10624d9dd2b59cffef6eccf8a37ecef
-- fabric-sdk-node commit level: 196d0484c884ab894374c73df89bfe047bcc9f00
-- fabric-ca commit level: 29385879bc2931cce9ec833acf796129908b72fb
+- fabric commit level: aa119ec8d446a34df70a281efad649626b41d395
+- fabric-sdk-node commit level: 1eedc511f62f6780899df15db9b91bec554c23ae
+- fabric-ca commit level: 77dc0ce08853615e6876db81fb9384c4e9c31209
 
 
 #NetworkLauncher.sh
@@ -47,7 +47,7 @@ This is the main script to execute all tasks.
 
     
 ##Example:
-    ./NetworkLauncher.sh -z 2 -o 1 -r 2 -p 2 -k 1 -n 5 -t kafka -f testOrg -w 10.120.223.35
+    ./NetworkLauncher.sh -z 2 -o 1 -r 2 -p 2 -k 1 -n 5 -t kafka -f test -w 10.120.223.35
 
 The above command will invoke cryptogen, cfgtxgen, and launch network.
 

@@ -358,7 +358,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                             fs.appendFileSync(dFile, buff);
                                     } else if ( lvl3_key[m] == 'ORDERER_GENERAL_LOCALMSPID' ) {
                                             var t = v+1;
-                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + 'Orderer' +t+'MSP' + '\n';
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + 'OrdererOrg' +t+ '\n';
                                             fs.appendFileSync(dFile, buff);
                                     } else if ( lvl3_key[m] == 'ORDERER_GENERAL_LOCALMSPDIR' ) {
                                             var t = v+1;
@@ -606,7 +606,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                         }
                                     } else if ( lvl3_key[m] == 'CORE_PEER_LOCALMSPID' ) {
                                         var t = (v - v%2)/2 + 1;
-                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + 'Peer'+t+'MSP' + '\n';
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + 'PeerOrg'+t + '\n';
                                             fs.appendFileSync(dFile, buff);
                                     } else if ( lvl3_key[m] == 'CORE_PEER_MSPCONFIGPATH' ) {
                                             //var t = (v - v%2)/2 + 1;
