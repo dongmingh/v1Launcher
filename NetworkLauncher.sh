@@ -26,10 +26,12 @@ function printHelp {
    echo "    -w: host ip, default=0.0.0.0"
    echo "    -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config"
    echo "    -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config"
+   echo "    -S: TLS base directory "
    echo " "
    echo " example: "
    echo " ./NetworkLauncher.sh -o 1 -z 2 -r 2 -p 2 -k 1 -n 1 -t kafka -f test -w 10.120.223.35 "
    echo " ./NetworkLauncher.sh -o 1 -z 2 -r 2 -p 2 -n 1 -f test -w 10.120.223.35 "
+   echo " ./NetworkLauncher.sh -o 1 -z 2 -r 2 -p 2 -k 1 -n 1 -t kafka -f test -w 10.120.223.35 -S /root/gopath/src/github.com/hyperledger/fabric-sdk-node/test/fixtures/tls"
    exit
 }
 
@@ -49,7 +51,7 @@ nChannel=1
 HostIP1="0.0.0.0"
 
 
-while getopts ":z:d:f:h:k:n:o:p:r:t:s:c:w:F:G:" opt; do
+while getopts ":z:d:f:h:k:n:o:p:r:t:s:c:w:F:G:S:" opt; do
   case $opt in
     # peer environment options
     z)
@@ -121,10 +123,15 @@ while getopts ":z:d:f:h:k:n:o:p:r:t:s:c:w:F:G:" opt; do
       export MSPDIR=$MSPDir
       echo "MSPDir: $MSPDir"
       ;;
+
     G)
       SRCMSPDir=$OPTARG
       export SRCMSPDIR=$SRCMSPDir
       echo "SRCMSPDir: $SRCMSPDir"
+      ;;
+
+    S)
+      TLSDir=$OPTARG
       ;;
 
     # else
@@ -226,6 +233,6 @@ echo "generate docker-compose.yml ..."
 echo "current working directory: $PWD"
 nPeers=$[ nPeersPerOrg * nOrg ]
 echo "number of peers: $nPeers"
-echo "./driver_GenOpt.sh -a create -z $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir"
-./driver_GenOpt.sh -a create -z $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir
+echo "./driver_GenOpt.sh -a create -z $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir -S $TLSDir"
+./driver_GenOpt.sh -a create -z $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir -S $TLSDir
 

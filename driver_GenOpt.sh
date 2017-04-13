@@ -15,6 +15,7 @@ function printHelp {
    echo "       -o: number of orderers "
    echo "       -k: number of brokers "
    echo "       -r: number of organiztions "
+   echo "       -S: TLS base directory "
    echo "       -z: number of ca "
    echo "       -F: local MSP base directory, default=/root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config"
    echo "       -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config"
@@ -30,6 +31,7 @@ function printHelp {
    echo " "
    echo "Example:"
    echo "   ./driver_GenOpt.sh -a create -z 2 -p 2 -r 2 -o 1 -k 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config "
+   echo "   ./driver_GenOpt.sh -a create -z 2 -p 2 -r 2 -o 1 -k 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config -S /root/gopath/src/github.com/hyperledger/fabric-sdk-node/test/fixtures/tls "
    echo " "
    exit
 }
@@ -38,9 +40,14 @@ function printHelp {
 nBroker=0
 nPeerPerOrg=1
 
-while getopts ":z:l:d:b:c:t:a:o:k:p:r:F:G:" opt; do
+while getopts ":z:l:d:b:c:t:a:o:k:p:r:F:G:S:" opt; do
   case $opt in
     # peer environment options
+    S)
+      TLSDIR=$OPTARG
+      export TLSDIR=$TLSDIR
+      echo "TLSDIR: $TLSDIR"
+      ;;
     z)
       nCA=$OPTARG
       echo "number of CA: $nCA"

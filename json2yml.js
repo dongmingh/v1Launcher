@@ -17,6 +17,18 @@ var CA=0;
 var CDB=0;
 var KAFKA=0;
 
+// TLS
+var TLS = 'disabled';
+var TLSDir;
+if ( process.env.TLSDIR != null ) {
+    TLS = 'enabled';
+    console.log(' TLSDir= ', process.env.TLSDIR);
+    TLSDir=process.env.TLSDIR;
+//var TLSDir='/root/gopath/src/github.com/hyperledger/fabric-sdk-node/test/fixtures/tls';
+}
+var TLSDestDir='/etc/hyperledger/tls';
+console.log('TLS: %s, TLSDir: %s, TLSDestDir: %s', TLS, TLSDir, TLSDestDir);
+
 // Orderer environment var
 var ord_env_name=[];
 var ord_env_val=[];
@@ -373,6 +385,16 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                     }
 
                                 }
+                                if ( TLS.toUpperCase() == 'ENABLED' ) {
+                                    buff = '  ' + '    - ORDERER_GENERAL_TLS_ENABLED=true'+'\n';
+                                    fs.appendFileSync(dFile, buff);
+                                    buff = '  ' + '    - ORDERER_GENERAL_TLS_PRIVATEKEY='+TLSDestDir+'/orderer/key.pem'+'\n';
+                                    fs.appendFileSync(dFile, buff);
+                                    buff = '  ' + '    - ORDERER_GENERAL_TLS_CERTIFICATE='+TLSDestDir+'/orderer/cert.pem'+'\n';
+                                    fs.appendFileSync(dFile, buff);
+                                    buff = '  ' + '    - ORDERER_GENERAL_TLS_ROOTCAS=['+TLSDestDir+'/orderer/ca-cert.pem, '+TLSDestDir+'/peers/peer0/ca-cert.pem, '+TLSDestDir+'/peers/peer2/ca-cert.pem]'+'\n';
+                                    fs.appendFileSync(dFile, buff);
+                                }
                         } else if ( ( lvl2_key[k] == 'image' ) || ( lvl2_key[k] == 'command' ) || ( lvl2_key[k] == 'working_dir' ) 
                                     || ( lvl2_key[k] == 'restart') ) {
                             buff = '  ' + '  ' + lvl2_key[k] + ': ' + lvl1_obj[lvl2_key[k]] + '\n';
@@ -395,6 +417,12 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                 buff = '  ' + '    - ' + srcMSPDir + ':' + MSPDir + '\n';
                                 fs.appendFileSync(dFile, buff);
 
+                            if ( TLS.toUpperCase() == 'ENABLED' ) {
+                                buff = '  ' + '    - '+TLSDir+'/orderer:'+TLSDestDir+'/orderer'+'\n';
+                                fs.appendFileSync(dFile, buff);
+                                buff = '  ' + '    - '+TLSDir+'/peers:'+TLSDestDir+'/peers'+'\n';
+                                fs.appendFileSync(dFile, buff);
+                            }
                         } else if ( lvl2_key[k] == 'ports' ) {
                                 lvl2_obj = lvl1_obj[lvl2_key[k]];
                                 lvl3_key = Object.keys(lvl2_obj);
@@ -621,6 +649,16 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                     }
 
                                 }
+                                if ( TLS.toUpperCase() == 'ENABLED' ) {
+                                    buff = '  ' + '    - CORE_PEER_TLS_ENABLED=true' + '\n';
+                                    fs.appendFileSync(dFile, buff);
+                                    buff = '  ' + '    - CORE_PEER_TLS_KEY_FILE='+TLSDestDir+'/key.pem'+'\n';
+                                    fs.appendFileSync(dFile, buff);
+                                    buff = '  ' + '    - CORE_PEER_TLS_CERT_FILE='+TLSDestDir+'/cert.pem'+'\n';
+                                    fs.appendFileSync(dFile, buff);
+                                    buff = '  ' + '    - CORE_PEER_TLS_ROOTCERT_FILE='+TLSDestDir+'/ca-cert.pem'+'\n';
+                                    fs.appendFileSync(dFile, buff);
+                                }
                         } else if ( ( lvl2_key[k] == 'image' ) || ( lvl2_key[k] == 'command' ) || ( lvl2_key[k] == 'working_dir' ) 
                                     || ( lvl2_key[k] == 'restart') ) {
                             buff = '  ' + '  ' + lvl2_key[k] + ': ' + lvl1_obj[lvl2_key[k]] + '\n';
@@ -694,6 +732,11 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                             }
                                 buff = '  ' + '    - ' + srcMSPDir+':'+ MSPDir + '\n';
                                 fs.appendFileSync(dFile, buff);
+
+                                if ( TLS.toUpperCase() == 'ENABLED' ) {
+                                    buff = '  ' + '    - '+TLSDir+'/peers/peer'+v+':'+TLSDestDir+'\n';
+                                    fs.appendFileSync(dFile, buff);
+                                }
 
                         } else if ( lvl2_key[k] == 'depends_on'  ){
                             var lvl2_obj = lvl1_obj[lvl2_key[k]];
