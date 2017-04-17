@@ -132,6 +132,7 @@ while getopts ":z:d:f:h:k:n:o:p:r:t:s:c:w:F:G:S:" opt; do
 
     S)
       TLSDir=$OPTARG
+      echo "TLSDir: $TLSDir"
       ;;
 
     # else
@@ -234,5 +235,9 @@ echo "current working directory: $PWD"
 nPeers=$[ nPeersPerOrg * nOrg ]
 echo "number of peers: $nPeers"
 echo "./driver_GenOpt.sh -a create -z $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir -S $TLSDir"
-./driver_GenOpt.sh -a create -z $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir -S $TLSDir
+if [ -z $TLSDir ]; then
+    ./driver_GenOpt.sh -a create -z $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir
+else
+    ./driver_GenOpt.sh -a create -z $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir -S $TLSDir
+fi
 
