@@ -632,6 +632,14 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                             buff = '  ' + '    - ' + lvl3_key[m] + '=' + 'couchdb'+v +':'+ tmp + '\n';
                                             fs.appendFileSync(dFile, buff);
                                         }
+                                    } else if ( lvl3_key[m] == 'CORE_PEER_GOSSIP_ORGLEADER' ) {
+                                        if ( (v%nPeerPerOrg) == 0 ) {
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + 'true' + '\n';
+                                            fs.appendFileSync(dFile, buff);
+                                        } else {
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + 'false' + '\n';
+                                            fs.appendFileSync(dFile, buff);
+                                        }
                                     } else if ( lvl3_key[m] == 'CORE_PEER_LOCALMSPID' ) {
                                         var t = (v - v%2)/2 + 1;
                                             buff = '  ' + '    - ' + lvl3_key[m] + '=' + 'PeerOrg'+t + '\n';
@@ -650,6 +658,10 @@ for ( i0=0; i0<top_key.length; i0++ ) {
 
                                 }
                                 if ( TLS.toUpperCase() == 'ENABLED' ) {
+                                    buff = '  ' + '    - CORE_PEER_ADDRESS=peer'+v+':7051' + '\n';
+                                    fs.appendFileSync(dFile, buff);
+                                    buff = '  ' + '    - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer'+v+':7051' + '\n';
+                                    fs.appendFileSync(dFile, buff);
                                     buff = '  ' + '    - CORE_PEER_TLS_ENABLED=true' + '\n';
                                     fs.appendFileSync(dFile, buff);
                                     buff = '  ' + '    - CORE_PEER_TLS_KEY_FILE='+TLSDestDir+'/key.pem'+'\n';
@@ -750,7 +762,8 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                 fs.appendFileSync(dFile, buff);
                             }
                             // header 4
-                            for ( m=0; m< v; m++ ) {
+                            var t = Math.floor(v / nPeerPerOrg) * nPeerPerOrg;
+                            for ( m=t; m< v; m++ ) {
                                 buff = '  ' + '    - ' +'peer'+m + '\n';
                                 fs.appendFileSync(dFile, buff);
                             }
@@ -877,7 +890,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                     for ( v = 0; v < addCA; v++ ) {
                         tmp_name = lvl1_key[i] + v;
                         tmp_port = caPort + v;
-                        console.log('tmp_name: %s, tmp_port: %s', tmp_name, tmp_port);
+                        //console.log('tmp_name: %s, tmp_port: %s', tmp_name, tmp_port);
                         buff = '  ' + tmp_name +':' + '\n';
                         fs.appendFileSync(dFile, buff);
 
