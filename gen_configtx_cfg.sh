@@ -2,6 +2,7 @@
 
 #
 # usage: ./driver_cfgtx_x.sh [opt] [value]
+# fabric coomit: f3c61e6cc3b04915081b15bbed000b377b53c4c1
 #
 
 HostIP1="0.0.0.0"
@@ -25,7 +26,7 @@ function printHelp {
    echo "    -w: host ip 1, default=0.0.0.0"
    echo " "
    echo "Example:"
-   echo " ./driver_cfgtx_x.sh -o 1 -k 1 -p 2 -r 2 -h SHA2 -s 256 -t kafka -b /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/ -w 10.120.223.35 -v 1 -v 3"
+   echo " ./gen_configtx_cfg.sh -o 1 -k 1 -p 2 -r 2 -h SHA2 -s 256 -t kafka -b /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/ -w 10.120.223.35 -v 1 -v 3"
    exit
 }
 
@@ -205,8 +206,13 @@ do
       elif [ "$t1" == "OrdererType:" ]; then
           echo "    $t1 $ordServType" >> $cfgOutFile
 
-      elif [ "$t1" == "&ProfileString" ]; then
-          echo "    $PROFILE_STRING:" >> $cfgOutFile
+      elif [ "$t1" == "&ProfileOrderString" ]; then
+          tmp=$PROFILE_STRING"OrgsOrdererGenesis"
+          echo "    $tmp:" >> $cfgOutFile
+
+      elif [ "$t1" == "&ProfileOrgString" ]; then
+          tmp=$PROFILE_STRING"OrgsChannel"
+          echo "    $tmp:" >> $cfgOutFile
 
       elif [ "$t1" == "Addresses:" ]; then
           echo "$line" >> $cfgOutFile
@@ -251,9 +257,9 @@ do
              echo "        Name: $tmp" >> $cfgOutFile
              echo "        ID: $tmp" >> $cfgOutFile
              #echo "        ID: $tt" >> $cfgOutFile
-             ordDir=$MSPBaseDir"/ordererOrganizations/ordererOrg"$i"/msp"
-             #ordDir=$MSPBaseDir"/ordererOrganizations/ordererOrg"$i"/orderers/ordererOrg"$i"orderer"$i
+             ordDir=$MSPBaseDir"/ordererOrganizations/orderer"$i".example.com/msp"
              echo "        MSPDir: $ordDir" >> $cfgOutFile
+             echo "        AdminPrincipal: Role.MEMBER" >> $cfgOutFile
 
              echo "" >> $cfgOutFile
              echo "        BCCSP:" >> $cfgOutFile
@@ -276,8 +282,9 @@ do
              echo "        Name: $tt" >> $cfgOutFile
              echo "        ID: $tt" >> $cfgOutFile
              #echo "        ID: $tmp" >> $cfgOutFile
-             peerDir=$MSPBaseDir"/peerOrganizations/peerOrg"$i"/msp"
+             peerDir=$MSPBaseDir"/peerOrganizations/org"$i".example.com/msp"
              echo "        MSPDir: $peerDir" >> $cfgOutFile
+             echo "        AdminPrincipal: Role.MEMBER" >> $cfgOutFile
 
              echo "" >> $cfgOutFile
              echo "        BCCSP:" >> $cfgOutFile

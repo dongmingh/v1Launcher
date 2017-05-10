@@ -2,6 +2,7 @@
 
 #
 # usage: ./driver_GenOpt.sh [opt] [value]
+# fabric coomit: f3c61e6cc3b04915081b15bbed000b377b53c4c1
 #
 
 
@@ -187,7 +188,7 @@ echo "GOPATH: $GOPATH"
 for (( i=0; i<$nCA; i++ ))
 do
     j=$[ i + 1 ]
-    Dir=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config/peerOrganizations/peerOrg$j"/ca"
+    Dir=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org$j".example.com/ca"
     cd $Dir
     tt=`ls *sk`
 

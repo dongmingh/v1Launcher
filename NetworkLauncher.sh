@@ -31,7 +31,7 @@ function printHelp {
    echo " example: "
    echo " ./NetworkLauncher.sh -o 1 -z 2 -r 2 -p 2 -k 1 -n 1 -t kafka -f test -w 10.120.223.35 "
    echo " ./NetworkLauncher.sh -o 1 -z 2 -r 2 -p 2 -n 1 -f test -w 10.120.223.35 "
-   echo " ./NetworkLauncher.sh -o 1 -z 2 -r 2 -p 2 -k 1 -n 1 -t kafka -f test -w 10.120.223.35 -S /root/gopath/src/github.com/hyperledger/fabric-sdk-node/test/fixtures/tls"
+   echo " ./NetworkLauncher.sh -o 1 -z 2 -r 2 -p 2 -k 1 -n 1 -t kafka -f test -w 10.120.223.35 -S ./tls "
    exit
 }
 
@@ -158,11 +158,22 @@ echo " PROFILE_STRING=$PROFILE_STRING, ordServType=$ordServType, nKafka=$nKafka,
 echo " nOrg=$nOrg, nPeersPerOrg=$nPeersPerOrg, ledgerDB=$ledgerDB, hashType=$hashType, secType=$secType"
 
 CHAN_PROFILE=$PROFILE_STRING"Channel"
-ORG_PROFILE=$PROFILE_STRING"Org"
+ORDERER_PROFILE=$PROFILE_STRING"OrgsOrdererGenesis"
+ORG_PROFILE=$PROFILE_STRING"OrgsChannel"
 
 CWD=$PWD
 echo "current working directory: $CWD"
 echo "GOPATH=$GOPATH"
+
+echo " "
+echo "        ####################################################### "
+echo "        #                generate crypto-config.yaml          # "
+echo "        ####################################################### "
+echo "generate crypto-config.yaml ..."
+rm -f crypto-config.yaml
+echo "./gen_crypto_cfg.sh -o $nOrderer -r $nOrg -p $nPeersPerOrg"
+./gen_crypto_cfg.sh -o $nOrderer -r $nOrg -p $nPeersPerOrg
+
 echo " "
 echo "        ####################################################### "
 echo "        #                execute cryptogen                    # "
@@ -177,8 +188,9 @@ cd $CWD
 echo "current working directory: $PWD"
 
 CRYPTOEXE=$CryptoBaseDir/cryptogen
-echo "$CRYPTOEXE -baseDir $CryptoBaseDir -ordererNodes $nOrderer -peerOrgs $nOrg -peersPerOrg $nPeersPerOrg"
-$CRYPTOEXE -baseDir $CryptoBaseDir -ordererNodes $nOrderer -peerOrgs $nOrg -peersPerOrg $nPeersPerOrg
+CRYPTOCFG=$CWD/crypto-config.yaml
+echo "$CRYPTOEXE generate --output=$CryptoBaseDir/crypto-config --config=$CRYPTOCFG"
+$CRYPTOEXE generate --output=$CryptoBaseDir/crypto-config --config=$CRYPTOCFG
 
 echo " "
 echo "        ####################################################### "
@@ -189,8 +201,8 @@ echo "generate configtx.yaml ..."
 cd $CWD
 echo "current working directory: $PWD"
 
-echo "./driver_cfgtx_x.sh -o $nOrderer -k $nKafka -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $ORG_PROFILE -w $HostIP1"
-./driver_cfgtx_x.sh -o $nOrderer -k $nKafka -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $ORG_PROFILE -w $HostIP1
+echo "./gen_configtx_cfg.sh -o $nOrderer -k $nKafka -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $PROFILE_STRING -w $HostIP1"
+#./gen_configtx_cfg.sh -o $nOrderer -k $nKafka -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $PROFILE_STRING -w $HostIP1
 
 echo " "
 echo "        ####################################################### "
@@ -199,17 +211,18 @@ echo "        ####################################################### "
 echo " "
 CFGGenDir=$GOPATH/src/github.com/hyperledger/fabric/build/bin
 CFGEXE=$CFGGenDir"/configtxgen"
-cp configtx.yaml $FabricDir"/common/configtx/tool"
+#cp configtx.yaml $FabricDir"/common/configtx/tool"
 #cd $CFGGenDir
 if [ ! -f $CFGEXE ]; then
     cd $FabricDir
     make configtxgen
-    cd $CWD
 fi
 #create orderer blocks
+cd $CWD
+echo "current working directory: $PWD"
 ordBlock=$ordererDir"/orderer.block"
-echo "$CFGEXE -profile $ORG_PROFILE -outputBlock $ordBlock"
-$CFGEXE -profile $ORG_PROFILE -outputBlock $ordBlock
+echo "$CFGEXE -profile $ORDERER_PROFILE -outputBlock $ordBlock"
+$CFGEXE -profile $ORDERER_PROFILE -outputBlock $ordBlock
 
 #create channels configuration transaction
 echo " "
@@ -219,10 +232,10 @@ echo "        ####################################################### "
 echo " "
 for (( i=1; i<=$nChannel; i++ ))
 do
-    channelTx=$ordererDir"/"$CHAN_PROFILE$i".tx"
+    channelTx=$ordererDir"/"$ORG_PROFILE$i".tx"
     #channelTx=$ordererDir"/mychannel.tx"
-    echo "$CFGEXE -profile $ORG_PROFILE -channelID $CHAN_PROFILE"$i" -outputCreateChannelTx $channelTx"
-    $CFGEXE -profile $ORG_PROFILE -channelID $CHAN_PROFILE"$i" -outputCreateChannelTx $channelTx
+    echo "$CFGEXE -profile $ORG_PROFILE -channelID $ORG_PROFILE"$i" -outputCreateChannelTx $channelTx"
+    $CFGEXE -profile $ORG_PROFILE -channelID $ORG_PROFILE"$i" -outputCreateChannelTx $channelTx
 done
 
 echo " "
@@ -234,10 +247,10 @@ echo "generate docker-compose.yml ..."
 echo "current working directory: $PWD"
 nPeers=$[ nPeersPerOrg * nOrg ]
 echo "number of peers: $nPeers"
-echo "./driver_GenOpt.sh -a create -z $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir -S $TLSDir"
+echo "./gen_network.sh -a create -z $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir -S $TLSDir"
 if [ -z $TLSDir ]; then
-    ./driver_GenOpt.sh -a create -z $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir
+    ./gen_network.sh -a create -z $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir
 else
-    ./driver_GenOpt.sh -a create -z $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir -S $TLSDir
+    ./gen_network.sh -a create -z $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir -S $TLSDir
 fi
 

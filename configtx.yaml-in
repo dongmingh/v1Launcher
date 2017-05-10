@@ -11,11 +11,17 @@ Profiles:
 
     # SampleSingleMSPSolo defines a configuration which contains a single MSP
     # definition (the MSP sampleconfig).
-    &ProfileString
+    &ProfileOrderString
         Orderer:
             <<: *OrdererDefaults
             Organizations:
                 - *OrdererOrg
+        Consortiums:
+            SampleConsortium:
+                Organizations:
+                    - *PeerOrg
+    &ProfileOrgString
+        Consortium: SampleConsortium
         Application:
             <<: *ApplicationDefaults
             Organizations:

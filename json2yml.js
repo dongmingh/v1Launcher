@@ -377,7 +377,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                             // This looks wrong; how would we get ordererOrg1Orderer2 ? 
                                             // buff = '  ' + '    - ' + lvl3_key[m] + '=' + ordererMSPDir + '/ordererOrg' + '' +t+'/orderers/ordererOrg'+t+'orderer'+t + '\n';
                                             // For now crytogen tool only puts all orderers into one ordererOrg1 anyways, so:
-                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + ordererMSPDir + '/ordererOrg1/orderers/ordererOrg1Orderer'+t + '\n';
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + ordererMSPDir + '/orderer'+t+'.example.com/orderers/orderer'+t+'.orderer'+t+'.example.com/msp' + '\n';
                                             fs.appendFileSync(dFile, buff);
                                     } else {
                                         buff = '  ' + '    - ' + lvl3_key[m] + '=' +lvl2_obj[lvl3_key[m]] + '\n';
@@ -647,9 +647,9 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                     } else if ( lvl3_key[m] == 'CORE_PEER_MSPCONFIGPATH' ) {
                                             //var t = (v - v%2)/2 + 1;
                                             var t = Math.floor(v / nPeerPerOrg) + 1;
-                                            var s = (v % nPeerPerOrg) + 1;
+                                            var s = (v % nPeerPerOrg);
                                             //console.log('CORE_PEER_MSPCONFIGPATH: ', v, t, s);
-                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + peerMSPDir + '/peerOrg'+t +'/peers/peerOrg'+t+'Peer'+s+ '\n';
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + peerMSPDir + '/org'+t +'.example.com/peers/peer'+s+'.org'+t+'.example.com/msp'+'\n';
                                             fs.appendFileSync(dFile, buff);
                                     } else {
                                         buff = '  ' + '    - ' + lvl3_key[m] + '=' +lvl2_obj[lvl3_key[m]] + '\n';
@@ -907,13 +907,20 @@ for ( i0=0; i0<top_key.length; i0++ ) {
 
                                 // header 4
                                 for ( m=0; m< lvl3_key.length; m++ ) {
-                                    buff = '  ' + '    - ' + lvl3_key[m] + '=' +lvl2_obj[lvl3_key[m]] + '\n';
-                                    fs.appendFileSync(dFile, buff);
+                                    if ( lvl3_key[m] == 'FABRIC_CA_SERVER_CA_NAME' ) {
+                                        var t = v+1;
+                                        buff = '  ' + '    - ' + lvl3_key[m] + '=' + lvl2_obj[lvl3_key[m]]+t + '\n';
+                                        fs.appendFileSync(dFile, buff);
+                                    } else {
+                                        buff = '  ' + '    - ' + lvl3_key[m] + '=' +lvl2_obj[lvl3_key[m]] + '\n';
+                                        fs.appendFileSync(dFile, buff);
 
+                                    }
                                 }
+
                             } else if ( lvl2_key[k] == 'container_name' ) {
                                 var t = v+1;
-                                buff = '  ' + '  ' + lvl2_key[k] + ': ' + 'ca_peerOrg'+t + '\n';
+                                buff = '  ' + '  ' + lvl2_key[k] + ': ' + lvl1_obj[lvl2_key[k]] + v + '\n';
                                 fs.appendFileSync(dFile, buff);
 
                             } else if ( lvl2_key[k] == 'command' ) {
@@ -942,7 +949,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
 
                                 // header 4
                                 var t0 = v+1;
-                                var t1 = 'peerOrg'+t0;
+                                var t1 = 'org'+t0+'.example.com';
                                 var tmp = srcMSPDir+'/peerOrganizations/'+t1+'/ca/:/etc/hyperledger/fabric-ca-server-config';
                                 buff = '  ' + '    - ' + tmp + '\n';
                                 //buff = '  ' + '    - ' +lvl2_obj[m] + '\n';
