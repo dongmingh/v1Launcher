@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# usage: ./driver_cfgtx_x.sh [opt] [value]
+# usage: ./gen_configtx_cfg.sh [opt] [value]
 # fabric coomit: f3c61e6cc3b04915081b15bbed000b377b53c4c1
 #
 
@@ -13,7 +13,7 @@ peerPort=7061
 
 function printHelp {
    echo "Usage: "
-   echo " ./driver_cfgtx.sh [opt] [value] "
+   echo " ./gen_configtx_cfg.sh [opt] [value] "
    echo "    -o: number of orderers, default=1"
    echo "    -k: number of kafka, default=0"
    echo "    -p: number of peers per organization, default=1"

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# usage: ./driver_GenOpt.sh [opt] [value]
+# usage: ./gen_network.sh [opt] [value]
 # fabric coomit: f3c61e6cc3b04915081b15bbed000b377b53c4c1
 #
 
@@ -9,7 +9,7 @@
 
 function printHelp {
    echo "Usage: "
-   echo " ./driver_GenOpt.sh [opt] [value] "
+   echo " ./gen_network.sh [opt] [value] "
    echo "    network variables"
    echo "       -a: action [create|add] "
    echo "       -p: number of peers per organization"
@@ -31,8 +31,8 @@ function printHelp {
    echo "       -c: batch timeout [10s|max secs before send an unfilled batch] "
    echo " "
    echo "Example:"
-   echo "   ./driver_GenOpt.sh -a create -z 2 -p 2 -r 2 -o 1 -k 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config "
-   echo "   ./driver_GenOpt.sh -a create -z 2 -p 2 -r 2 -o 1 -k 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config -S /root/gopath/src/github.com/hyperledger/fabric-sdk-node/test/fixtures/tls "
+   echo "   ./gen_network.sh -a create -z 2 -p 2 -r 2 -o 1 -k 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config "
+   echo "   ./gen_network.sh -a create -z 2 -p 2 -r 2 -o 1 -k 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config -S /root/gopath/src/github.com/hyperledger/fabric-sdk-node/test/fixtures/tls "
    echo " "
    exit
 }
@@ -193,8 +193,41 @@ do
     tt=`ls *sk`
 
     cd $CWD
+
     sed '-i' "s/CA_SK$i/$tt/g" docker-compose.yml
 
+done
+
+for (( i=0; i<$nOrderer; i++ ))
+do
+    j=$[ i + 1 ]
+    Dir=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/orderer1.example.com/orderers/orderer1.orderer1.example.com/msp/keystore
+    cd $Dir
+    tt=`ls *sk`
+
+    cd $CWD
+
+    sed '-i' "s/ORDERER_SK/$tt/g" docker-compose.yml
+
+done
+
+for (( i=0; i<$nOrg; i++ ))
+do
+    i1=$[ i + 1 ]
+    for (( j=0; j<$nPeerPerOrg; j++ ))
+    do
+        Dir=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org$i1".example.com/peers/peer"$j".org"$i1".example.com/msp/keystore"
+
+        cd $Dir
+        tt=`ls *sk`
+
+        cd $CWD
+
+        PEER_SK=ORG$i1"PEER_SK"$j
+        echo "PEER_SK: $PEER_SK"
+        sed '-i' "s/$PEER_SK/$tt/g" docker-compose.yml
+
+    done
 done
 
 ## sed 's/-x86_64/TEST/g' docker-compose.yml > ss.yml

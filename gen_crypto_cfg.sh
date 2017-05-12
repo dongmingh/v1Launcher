@@ -1,19 +1,19 @@
 #!/bin/bash
 
 #
-# usage: ./driver_crypto.sh [opt] [value]
+# usage: ./gen_crypto_cfg.sh [opt] [value]
 # fabric coomit: f3c61e6cc3b04915081b15bbed000b377b53c4c1
 #
 
 function printHelp {
    echo "Usage: "
-   echo " ./driver_crypto.sh [opt] [value] "
+   echo " ./gen_crypto_cfg.sh [opt] [value] "
    echo "    -o: number of orderers, default=1"
    echo "    -p: number of peers per organization, default=1"
    echo "    -r: number of organization, default=1"
    echo " "
    echo "Example:"
-   echo " ./driver_crypto.sh -o 1 -p 2 -r 2"
+   echo " ./gen_crypto_cfg.sh -o 1 -p 2 -r 2"
    exit
 }
 

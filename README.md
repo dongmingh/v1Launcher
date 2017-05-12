@@ -5,19 +5,19 @@ Network Launcher
 
 The network Launcher can execute the following task:
 
-1. generate crypto using cryptogen
+1. generate crypto-config yaml and execute cryptogen to generate crypto
 2. create configtx.yml
 3. create orderer block
 4. create channel configuration transaction
 5. create a docker-compose.yml and launch a network
 
-The usages of each script is given below so that they can be executed separately as needed.  However, the script, v1launcher.sh, is designed to execute all tasks sequentially.
+The usages of each script is given below so that they can be executed separately as needed.  However, the script, networkLauncher.sh, is designed to execute all tasks sequentially.
 
 ##Code Base
 
-- fabric commit level: aa119ec8d446a34df70a281efad649626b41d395
-- fabric-sdk-node commit level: 1eedc511f62f6780899df15db9b91bec554c23ae
-- fabric-ca commit level: 77dc0ce08853615e6876db81fb9384c4e9c31209
+- fabric commit level: f3c61e6cc3b04915081b15bbed000b377b53c4c1
+- fabric-sdk-node commit level: 80d85084f574e593a634459e132eb8a552e80a7e
+- fabric-ca commit level: 4f8666363c13c48327edd4e75403a56b806d745b
 
 
 #NetworkLauncher.sh
@@ -44,12 +44,15 @@ This is the main script to execute all tasks.
          -w: host ip 1, default=0.0.0.0
          -F: local MSP base directory, default=/root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config
          -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config
+         -S: TLS base directory
 
     
 ##Example:
-    ./NetworkLauncher.sh -z 2 -o 1 -r 2 -p 2 -k 1 -n 5 -t kafka -f test -w 10.120.223.35
+    ./networkLauncher.sh -o 1 -z 2 -r 2 -p 2 -k 1 -n 2 -t kafka -f test -w 10.120.223.35 
+    ./networkLauncher.sh -o 1 -z 2 -r 2 -p 2 -n 1 -f test -w 10.120.223.35
+    ./NetworkLauncher.sh -z 2 -o 1 -r 2 -p 2 -k 1 -n 2 -t kafka -f test -w 10.120.223.35 -S $GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config
 
-The above command will invoke cryptogen, cfgtxgen, and launch network.
+The above command will invoke cryptogen, cfgtxgen, generate orderer block, channel transaction and launch network.
 
 #cryptogen
 
@@ -60,24 +63,16 @@ The executable is in $GOPATH/src/github.com/hyperledger/fabric/common/tools/cryp
     go build
 
 ##Usage
-    ./cryptogen -baseDir . -ordererNodes <int> -peerOrgs <int> -peersPerOrg <int>
-    -baseDir string
-        directory in which to place artifacts (default ".")
-    -ordererNodes int
-        number of ordering service nodes (default 1)
-    -peerOrgs int
-        number of unique organizations with peers (default 2)
-    -peersPerOrg int
-        number of peers per organization (default 1)
+    ./cryptogen generate --output=<cryptogen dir> --config=<crypto config>
 
 
 
-#driver_cfgtx_x.sh
+#gen_cfgtx_x.sh
 
 The script is used to create configtx.yml.
 
 ##Usage
-    ./driver_cfgtx_x.sh [opt] [value] 
+    ./gen_cfgtx_x.sh [opt] [value] 
 
     options:
        -o: number of orderers, default=1
@@ -92,7 +87,7 @@ The script is used to create configtx.yml.
 
 
 ##Example:"
-    ./driver_cfgtx.sh -o 1 -k 1 -p 2 -r 6 -h SHA2 -s 256 -t kafka -b /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/ -w 10.120.223.35
+    ./gen_cfgtx.sh -o 1 -k 1 -p 2 -r 6 -h SHA2 -s 256 -t kafka -b /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/ -w 10.120.223.35
 
 
 
@@ -105,11 +100,11 @@ This is a sample of configtx.yaml to be used to generate the desired configtx.ym
 + &Org0: used for the list of peers in organization
 + OrdererType: used for the orderer service type
 
-#driver_GenOpt.sh
+#gen_network.sh
 The script is used to create a docker-compose.yml and launch the network with specified number of peers, orderers, orderer service type etc.
 
 ##Usage
-    driver_GenOpt.sh [opt] [value]
+    gen_network.sh [opt] [value]
 
     options:
        network variables
@@ -133,7 +128,7 @@ The script is used to create a docker-compose.yml and launch the network with sp
 
 
 ##Example
-    ./driver_GenOpt.sh -a create -z 2 -p 2 -r 2 -o 1 -k 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config
+    ./gen_network.sh -a create -z 2 -p 2 -r 2 -o 1 -k 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config
 
 
 ##IP address and port
