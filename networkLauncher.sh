@@ -10,7 +10,7 @@ SRCMSPDir="/opt/hyperledger/fabric/msp/crypto-config"
 function printHelp {
 
    echo "Usage: "
-   echo " ./NetworkLauncher.sh [opt] [value] "
+   echo " ./networkLauncher.sh [opt] [value] "
    echo "    -z: number of ca, default=0"
    echo "    -d: ledger database type, default=goleveldb"
    echo "    -f: profile string, default=test"
@@ -29,9 +29,9 @@ function printHelp {
    echo "    -S: TLS base directory "
    echo " "
    echo " example: "
-   echo " ./NetworkLauncher.sh -o 1 -z 2 -r 2 -p 2 -k 1 -n 1 -t kafka -f test -w 10.120.223.35 "
-   echo " ./NetworkLauncher.sh -o 1 -z 2 -r 2 -p 2 -n 1 -f test -w 10.120.223.35 "
-   echo " ./NetworkLauncher.sh -o 1 -z 2 -r 2 -p 2 -k 1 -n 1 -t kafka -f test -w 10.120.223.35 -S ./tls "
+   echo " ./networkLauncher.sh -o 1 -z 2 -r 2 -p 2 -k 1 -n 1 -t kafka -f test -w 10.120.223.35 "
+   echo " ./networkLauncher.sh -o 1 -z 2 -r 2 -p 2 -n 1 -f test -w 10.120.223.35 "
+   echo " ./networkLauncher.sh -o 1 -z 2 -r 2 -p 2 -k 1 -n 1 -t kafka -f test -w 10.120.223.35 -S ./tls "
    exit
 }
 

@@ -35,7 +35,7 @@
             ]
         },
         "zookeeper": {
-            "image": "hyperledger/fabric-zookeeper:x86_64-1.0.0-alpha",
+            "image": "hyperledger/fabric-zookeeper",
             "container_name": "zookeeper",
             "networks": [
                  "bridge"
