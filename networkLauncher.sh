@@ -27,6 +27,7 @@ function printHelp {
    echo "    -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config"
    echo "    -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config"
    echo "    -S: TLS base directory "
+   echo "    -C: company name, default=example.com "
    echo " "
    echo " example: "
    echo " ./networkLauncher.sh -o 1 -z 2 -r 2 -p 2 -k 1 -n 2 -t kafka -f test -w 10.120.223.35 "
@@ -49,9 +50,10 @@ secType="256"
 CryptoBaseDir=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen
 nChannel=1
 HostIP1="0.0.0.0"
+comName="example.com"
 
 
-while getopts ":z:d:f:h:k:n:o:p:r:t:s:c:w:F:G:S:" opt; do
+while getopts ":z:d:f:h:k:n:o:p:r:t:s:c:w:F:G:S:C:" opt; do
   case $opt in
     # peer environment options
     z)
@@ -135,6 +137,11 @@ while getopts ":z:d:f:h:k:n:o:p:r:t:s:c:w:F:G:S:" opt; do
       echo "TLSDir: $TLSDir"
       ;;
 
+    C)
+      comName=$OPTARG
+      echo "comName: $comName"
+      ;;
+
     # else
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -154,8 +161,8 @@ done
 #fi
 
 # sanity check
-echo " PROFILE_STRING=$PROFILE_STRING, ordServType=$ordServType, nKafka=$nKafka, nOrderer=$nOrderer"
-echo " nOrg=$nOrg, nPeersPerOrg=$nPeersPerOrg, ledgerDB=$ledgerDB, hashType=$hashType, secType=$secType"
+echo " PROFILE_STRING=$PROFILE_STRING, ordServType=$ordServType, nKafka=$nKafka, nOrderer=$nOrderer "
+echo " nOrg=$nOrg, nPeersPerOrg=$nPeersPerOrg, ledgerDB=$ledgerDB, hashType=$hashType, secType=$secType, comName=$comName"
 
 CHAN_PROFILE=$PROFILE_STRING"Channel"
 ORDERER_PROFILE=$PROFILE_STRING"OrgsOrdererGenesis"
@@ -171,8 +178,8 @@ echo "        #                generate crypto-config.yaml          # "
 echo "        ####################################################### "
 echo "generate crypto-config.yaml ..."
 rm -f crypto-config.yaml
-echo "./gen_crypto_cfg.sh -o $nOrderer -r $nOrg -p $nPeersPerOrg"
-./gen_crypto_cfg.sh -o $nOrderer -r $nOrg -p $nPeersPerOrg
+echo "./gen_crypto_cfg.sh -o $nOrderer -r $nOrg -p $nPeersPerOrg -C $comName"
+./gen_crypto_cfg.sh -o $nOrderer -r $nOrg -p $nPeersPerOrg -C $comName
 
 echo " "
 echo "        ####################################################### "
@@ -201,8 +208,8 @@ echo "generate configtx.yaml ..."
 cd $CWD
 echo "current working directory: $PWD"
 
-echo "./gen_configtx_cfg.sh -o $nOrderer -k $nKafka -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $PROFILE_STRING -w $HostIP1"
-./gen_configtx_cfg.sh -o $nOrderer -k $nKafka -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $PROFILE_STRING -w $HostIP1
+echo "./gen_configtx_cfg.sh -o $nOrderer -k $nKafka -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $PROFILE_STRING -w $HostIP1 -C $comName"
+./gen_configtx_cfg.sh -o $nOrderer -k $nKafka -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $PROFILE_STRING -w $HostIP1 -C $comName
 
 echo " "
 echo "        ####################################################### "
@@ -249,8 +256,8 @@ nPeers=$[ nPeersPerOrg * nOrg ]
 echo "number of peers: $nPeers"
 echo "./gen_network.sh -a create -z $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir -S $TLSDir"
 if [ -z $TLSDir ]; then
-    ./gen_network.sh -a create -z $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir
+    ./gen_network.sh -a create -z $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir -C $comName
 else
-    ./gen_network.sh -a create -z $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir -S $TLSDir
+    ./gen_network.sh -a create -z $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir -S $TLSDir -C $comName
 fi
 

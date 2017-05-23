@@ -24,6 +24,7 @@ function printHelp {
    echo "    -f: profile name, default=testOrg"
    echo "    -b: MSP directory, default=/mnt/crypto-config"
    echo "    -w: host ip 1, default=0.0.0.0"
+   echo "    -C: company name, default=example.com"
    echo " "
    echo "Example:"
    echo " ./gen_configtx_cfg.sh -o 1 -k 1 -p 2 -r 2 -h SHA2 -s 256 -t kafka -b /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/ -w 10.120.223.35 -v 1 -v 3"
@@ -87,9 +88,10 @@ hashType="SHA2"
 SecType="256"
 PROFILE_STRING="testOrg"
 MSPBaseDir=$GOPATH"/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config"
+comName="example.com"
 
 k=0
-while getopts ":o:k:p:s:h:r:t:f:b:w:v:" opt; do
+while getopts ":o:k:p:s:h:r:t:f:b:w:v:C:" opt; do
   case $opt in
     # number of orderers
     o)
@@ -150,6 +152,11 @@ while getopts ":o:k:p:s:h:r:t:f:b:w:v:" opt; do
       k=$[ k + 1 ]
       OrgArray[$k]=$OPTARG
       echo "k:  $k, ${#OrgArray[@]}, OrgArray=${OrgArray[@]}"
+      ;;
+
+    C)
+      comName=$OPTARG
+      echo "comName:  $comName"
       ;;
 
     # else
@@ -217,7 +224,7 @@ do
       elif [ "$t1" == "Addresses:" ]; then
           echo "$line" >> $cfgOutFile
           #echo "         - $peerIP":"$ordererPort, $peerIP":"$[ ordererPort + 1 ], $peerIP":"$[ ordererPort + 2 ]" >> $cfgOutFile
-          tmp=$peerIP":"$ordererPort
+          tmp="orderer1."$comName":"$ordererPort
           tmpPort=$ordererPort
           for (( i=2; i<=$nOrderer; i++  ))
           do
@@ -257,7 +264,7 @@ do
              echo "        Name: $tmp" >> $cfgOutFile
              echo "        ID: $tmp" >> $cfgOutFile
              #echo "        ID: $tt" >> $cfgOutFile
-             ordDir=$MSPBaseDir"/ordererOrganizations/orderer"$i".example.com/msp"
+             ordDir=$MSPBaseDir"/ordererOrganizations/"$comName"/msp"
              echo "        MSPDir: $ordDir" >> $cfgOutFile
              echo "        AdminPrincipal: Role.MEMBER" >> $cfgOutFile
 
@@ -282,7 +289,7 @@ do
              echo "        Name: $tt" >> $cfgOutFile
              echo "        ID: $tt" >> $cfgOutFile
              #echo "        ID: $tmp" >> $cfgOutFile
-             peerDir=$MSPBaseDir"/peerOrganizations/org"$i".example.com/msp"
+             peerDir=$MSPBaseDir"/peerOrganizations/org"$i"."$comName"/msp"
              echo "        MSPDir: $peerDir" >> $cfgOutFile
              echo "        AdminPrincipal: Role.MEMBER" >> $cfgOutFile
 
@@ -298,8 +305,9 @@ do
 
              #tmpPort=$[ HostPort + peersPerOrg * ( i - 1 ) ]
              tmpPort=$[ peerPort + peersPerOrg * ( i - 1 ) ]
+             tmpHost="peer0.org"$i"."$comName
              echo "        AnchorPeers:" >> $cfgOutFile
-             echo "            - Host: $HostIP1" >> $cfgOutFile
+             echo "            - Host: $tmpHost" >> $cfgOutFile
              echo "              Port: $tmpPort" >> $cfgOutFile
              echo "" >> $cfgOutFile
 

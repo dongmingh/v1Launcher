@@ -41,7 +41,7 @@ function printHelp {
 nBroker=0
 nPeerPerOrg=1
 
-while getopts ":z:l:d:b:c:t:a:o:k:p:r:F:G:S:" opt; do
+while getopts ":z:l:d:b:c:t:a:o:k:p:r:F:G:S:C:" opt; do
   case $opt in
     # peer environment options
     S)
@@ -118,6 +118,12 @@ while getopts ":z:l:d:b:c:t:a:o:k:p:r:F:G:S:" opt; do
       echo "# of orderer: $nOrderer"
       ;;
 
+    C)
+      comName=$OPTARG
+      export comName=$comName
+      echo "comName: $comName"
+      ;;
+
     # else
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -188,7 +194,7 @@ echo "GOPATH: $GOPATH"
 for (( i=0; i<$nCA; i++ ))
 do
     j=$[ i + 1 ]
-    Dir=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org$j".example.com/ca"
+    Dir=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org$j"."$comName"/ca"
     cd $Dir
     tt=`ls *sk`
 
@@ -201,7 +207,7 @@ done
 for (( i=0; i<$nOrderer; i++ ))
 do
     j=$[ i + 1 ]
-    Dir=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/orderer1.example.com/orderers/orderer1.orderer1.example.com/msp/keystore
+    Dir=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/$comName"/orderers/orderer1."$comName"/msp/keystore"
     cd $Dir
     tt=`ls *sk`
 
@@ -216,7 +222,7 @@ do
     i1=$[ i + 1 ]
     for (( j=0; j<$nPeerPerOrg; j++ ))
     do
-        Dir=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org$i1".example.com/peers/peer"$j".org"$i1".example.com/msp/keystore"
+        Dir=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org$i1"."$comName"/peers/peer"$j".org"$i1"."$comName"/msp/keystore"
 
         cd $Dir
         tt=`ls *sk`
@@ -224,7 +230,7 @@ do
         cd $CWD
 
         PEER_SK=ORG$i1"PEER_SK"$j
-        echo "PEER_SK: $PEER_SK"
+        #echo "PEER_SK: $PEER_SK"
         sed '-i' "s/$PEER_SK/$tt/g" docker-compose.yml
 
     done

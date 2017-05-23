@@ -17,6 +17,17 @@ var CA=0;
 var CDB=0;
 var KAFKA=0;
 
+var comName;
+var TLSDir;
+if ( process.env.comName != null ) {
+    TLS = 'enabled';
+    comName=process.env.comName;
+} else {
+    comName = 'example.com';
+}
+console.log(' comName= ', comName);
+
+var ordererName;
 // TLS
 var TLS = 'disabled';
 var TLSDir;
@@ -24,7 +35,6 @@ if ( process.env.TLSDIR != null ) {
     TLS = 'enabled';
     console.log(' TLSDir= ', process.env.TLSDIR);
     TLSDir=process.env.TLSDIR;
-//var TLSDir='/root/gopath/src/github.com/hyperledger/fabric-sdk-node/test/fixtures/tls';
 }
 var TLSDestDir='/etc/hyperledger/tls';
 console.log('TLS: %s, TLSDir: %s, TLSDestDir: %s', TLS, TLSDir, TLSDestDir);
@@ -312,8 +322,9 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                 }
              } else if (lvl1_key[i] == 'orderer' ) {
                 for ( v = 0; v < addOrderer; v++ ) {
-                    tmp_name = lvl1_key[i] + v;
-                    buff = '  ' + tmp_name +':' + '\n';
+                    //tmp_name = lvl1_key[i] + v;
+                    ordererName = 'orderer1.'+comName;
+                    buff = '  ' + ordererName +':' + '\n';
                     fs.appendFileSync(dFile, buff);
 
                     // header 3
@@ -377,7 +388,8 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                             // This looks wrong; how would we get ordererOrg1Orderer2 ? 
                                             // buff = '  ' + '    - ' + lvl3_key[m] + '=' + ordererMSPDir + '/ordererOrg' + '' +t+'/orderers/ordererOrg'+t+'orderer'+t + '\n';
                                             // For now crytogen tool only puts all orderers into one ordererOrg1 anyways, so:
-                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + ordererMSPDir + '/orderer'+t+'.example.com/orderers/orderer'+t+'.orderer'+t+'.example.com/msp' + '\n';
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + ordererMSPDir + '/'+comName+'/orderers/orderer'+t+'.'+comName+'/msp' + '\n';
+                                            //buff = '  ' + '    - ' + lvl3_key[m] + '=' + ordererMSPDir + '/orderer'+t+'.example.com/orderers/orderer'+t+'.orderer'+t+'.example.com/msp' + '\n';
                                             fs.appendFileSync(dFile, buff);
                                     } else {
                                         buff = '  ' + '    - ' + lvl3_key[m] + '=' +lvl2_obj[lvl3_key[m]] + '\n';
@@ -387,20 +399,19 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                 }
                                 if ( TLS.toUpperCase() == 'ENABLED' ) {
                                     var v1 = v+1;
-                                    var OrdTLSDir = MSPDir + '/ordererOrganizations/orderer' + v1 +'.example.com/orderers/orderer' + v1 + '.orderer' +v1 + '.example.com/msp';
-                                    var org1TLSDir = MSPDir + '/peerOrganizations/org1.example.com/msp';
-                                    var org2TLSDir = MSPDir + '/peerOrganizations/org2.example.com/msp';
+                                    //var OrdTLSDir = MSPDir + '/ordererOrganizations/orderer' + v1 +'.example.com/orderers/orderer' + v1 + '.orderer' +v1 + '.example.com/msp';
+                                    var OrdTLSDir = MSPDir + '/ordererOrganizations/'+comName+'/orderers/orderer' +v1 + '.'+comName+'/tls';
+                                    var org1TLSDir = MSPDir + '/peerOrganizations/org1.'+comName+'/tls';
+                                    var org2TLSDir = MSPDir + '/peerOrganizations/org2.'+comName+'/tls';
 
                                     buff = '  ' + '    - ORDERER_GENERAL_TLS_ENABLED=true'+'\n';
                                     fs.appendFileSync(dFile, buff);
-                                    buff = '  ' + '    - ORDERER_GENERAL_TLS_PRIVATEKEY='+OrdTLSDir+'/keystore/ORDERER_SK'+'\n';
+                                    buff = '  ' + '    - ORDERER_GENERAL_TLS_PRIVATEKEY='+OrdTLSDir+'/server.key'+'\n';
                                     fs.appendFileSync(dFile, buff);
-                                    buff = '  ' + '    - ORDERER_GENERAL_TLS_CERTIFICATE='+OrdTLSDir+'/signcerts/orderer'+v1+'.orderer'+v1+'.example.com-cert.pem'+'\n';
+                                    buff = '  ' + '    - ORDERER_GENERAL_TLS_CERTIFICATE='+OrdTLSDir+'/server.crt'+'\n';
                                     fs.appendFileSync(dFile, buff);
-                                    var ordererCerts=OrdTLSDir+'/cacerts/ca.orderer1.example.com-cert.pem';
-                                    var org1Certs=org1TLSDir+'/cacerts/ca.org1.example.com-cert.pem';
-                                    var org2Certs=org2TLSDir+'/cacerts/ca.org2.example.com-cert.pem';
-                                    buff = '  ' + '    - ORDERER_GENERAL_TLS_ROOTCAS=['+ordererCerts+', '+org1Certs+', '+org2Certs+']'+'\n';
+                                    var ordererCerts=OrdTLSDir+'/ca.crt';
+                                    buff = '  ' + '    - ORDERER_GENERAL_TLS_ROOTCAS=['+ordererCerts+']'+'\n';
                                     fs.appendFileSync(dFile, buff);
                                 }
                         } else if ( ( lvl2_key[k] == 'image' ) || ( lvl2_key[k] == 'command' ) || ( lvl2_key[k] == 'working_dir' ) 
@@ -408,7 +419,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                             buff = '  ' + '  ' + lvl2_key[k] + ': ' + lvl1_obj[lvl2_key[k]] + '\n';
                             fs.appendFileSync(dFile, buff);
                         } else if ( lvl2_key[k] == 'container_name' ) {
-                            buff = '  ' + '  ' + lvl2_key[k] + ': ' + tmp_name + '\n';
+                            buff = '  ' + '  ' + lvl2_key[k] + ': ' + ordererName + '\n';
                             fs.appendFileSync(dFile, buff);
                         } else if ( lvl2_key[k] == 'volumes' ) {
                             var lvl2_obj = lvl1_obj[lvl2_key[k]];
@@ -581,9 +592,13 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                 }
              } else if (lvl1_key[i] == 'peer' ) {
                 for ( v = 0; v < addVP; v++ ) {
+                    var t = Math.floor(v / nPeerPerOrg) + 1;
+                    var s = (v % nPeerPerOrg);
+                    var peerName = 'peer'+s+'.org'+t+'.'+comName;
+                    //console.log('v: %d, peerName: %s', v, peerName);
                     tmp_name = lvl1_key[i] + v;
                     tmp_port = vp0Port + v;
-                    buff = '  ' + tmp_name +':' + '\n';
+                    buff = '  ' + peerName +':' + '\n';
                     fs.appendFileSync(dFile, buff);
 
                     // header 3
@@ -602,7 +617,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                         buff = '  ' + '    - ' + lvl3_key[m] + '=' + peer_env_val[tmp] + '\n';
                                         fs.appendFileSync(dFile, buff);
                                     } else if ( lvl3_key[m] == 'CORE_PEER_ID' ) {
-                                        buff = '  ' + '    - ' + lvl3_key[m] + '=' + tmp_name + '\n';
+                                        buff = '  ' + '    - ' + lvl3_key[m] + '=' + peerName + '\n';
                                         fs.appendFileSync(dFile, buff);
                                     } else if ( lvl3_key[m] == 'CORE_PEER_NETWORKID' ) {
                                         buff = '  ' + '    - ' + lvl3_key[m] + '=' + tmp_name + '\n';
@@ -618,7 +633,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                         fs.appendFileSync(dFile, buff);
                                     } else if ( lvl3_key[m] == 'CORE_PEER_GOSSIP_BOOTSTRAP' ) {
                                         if ( v != 0 ) {
-                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + vp0Addr +':'+ vp0Port + '\n';
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + peerName +':'+ vp0Port + '\n';
                                             fs.appendFileSync(dFile, buff);
                                         }
                                     } else if ( lvl3_key[m] == 'CORE_PEER_DISCOVERY_ROOTNODE' ) {
@@ -657,7 +672,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                             var t = Math.floor(v / nPeerPerOrg) + 1;
                                             var s = (v % nPeerPerOrg);
                                             //console.log('CORE_PEER_MSPCONFIGPATH: ', v, t, s);
-                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + peerMSPDir + '/org'+t +'.example.com/peers/peer'+s+'.org'+t+'.example.com/msp'+'\n';
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + peerMSPDir + '/org'+t +'.'+comName+'/peers/peer'+s+'.org'+t+'.'+comName+'/msp'+'\n';
                                             fs.appendFileSync(dFile, buff);
                                     } else {
                                         buff = '  ' + '    - ' + lvl3_key[m] + '=' +lvl2_obj[lvl3_key[m]] + '\n';
@@ -668,17 +683,17 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                 if ( TLS.toUpperCase() == 'ENABLED' ) {
                                     var t = Math.floor(v / nPeerPerOrg) + 1;
                                     var s = (v % nPeerPerOrg);
-                                    buff = '  ' + '    - CORE_PEER_ADDRESS=peer'+v+':7051' + '\n';
+                                    buff = '  ' + '    - CORE_PEER_ADDRESS='+peerName+':7051' + '\n';
                                     fs.appendFileSync(dFile, buff);
-                                    buff = '  ' + '    - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer'+v+':7051' + '\n';
+                                    buff = '  ' + '    - CORE_PEER_GOSSIP_EXTERNALENDPOINT='+peerName+':7051' + '\n';
                                     fs.appendFileSync(dFile, buff);
                                     buff = '  ' + '    - CORE_PEER_TLS_ENABLED=true' + '\n';
                                     fs.appendFileSync(dFile, buff);
-                                    buff = '  ' + '    - CORE_PEER_TLS_KEY_FILE='+peerMSPDir+'/org'+t +'.example.com/peers/peer'+s+'.org'+t+'.example.com/msp/keystore/ORG'+t+'PEER_SK'+s+'\n';
+                                    buff = '  ' + '    - CORE_PEER_TLS_KEY_FILE='+peerMSPDir+'/org'+t +'.'+comName+'/peers/peer'+s+'.org'+t+'.'+comName+'/tls/server.key'+'\n';
                                     fs.appendFileSync(dFile, buff);
-                                    buff = '  ' + '    - CORE_PEER_TLS_CERT_FILE='+peerMSPDir+'/org'+t +'.example.com/peers/peer'+s+'.org'+t+'.example.com/msp/signcerts/peer'+s+'.org'+t+'.example.com-cert.pem'+'\n';
+                                    buff = '  ' + '    - CORE_PEER_TLS_CERT_FILE='+peerMSPDir+'/org'+t +'.'+comName+'/peers/peer'+s+'.org'+t+'.'+comName+'/tls/server.crt'+'\n';
                                     fs.appendFileSync(dFile, buff);
-                                    buff = '  ' + '    - CORE_PEER_TLS_ROOTCERT_FILE='+peerMSPDir+'/org'+t +'.example.com/peers/peer'+s+'.org'+t+'.example.com/msp/cacerts/ca.org'+t+'.example.com-cert.pem'+'\n';
+                                    buff = '  ' + '    - CORE_PEER_TLS_ROOTCERT_FILE='+peerMSPDir+'/org'+t +'.'+comName+'/peers/peer'+s+'.org'+t+'.'+comName+'/tls/ca.crt'+'\n';
                                     fs.appendFileSync(dFile, buff);
                                 }
                         } else if ( ( lvl2_key[k] == 'image' ) || ( lvl2_key[k] == 'command' ) || ( lvl2_key[k] == 'working_dir' ) 
@@ -687,7 +702,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                             fs.appendFileSync(dFile, buff);
 
                         } else if ( lvl2_key[k] == 'container_name' ) {
-                            buff = '  ' + '  ' + lvl2_key[k] + ': ' + tmp_name + '\n';
+                            buff = '  ' + '  ' + lvl2_key[k] + ': ' + peerName + '\n';
                             fs.appendFileSync(dFile, buff);
 
                         } else if ( lvl2_key[k] == 'ports' ) {
@@ -755,10 +770,10 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                 buff = '  ' + '    - ' + srcMSPDir+':'+ MSPDir + '\n';
                                 fs.appendFileSync(dFile, buff);
 
-                                if ( TLS.toUpperCase() == 'ENABLED' ) {
-                                    buff = '  ' + '    - '+TLSDir+'/peers/peer'+v+':'+TLSDestDir+'\n';
-                                    fs.appendFileSync(dFile, buff);
-                                }
+                            //    if ( TLS.toUpperCase() == 'ENABLED' ) {
+                            //        buff = '  ' + '    - '+TLSDir+'/peers/peer'+v+':'+TLSDestDir+'\n';
+                            //        fs.appendFileSync(dFile, buff);
+                            //    }
 
                         } else if ( lvl2_key[k] == 'depends_on'  ){
                             var lvl2_obj = lvl1_obj[lvl2_key[k]];
@@ -768,13 +783,18 @@ for ( i0=0; i0<top_key.length; i0++ ) {
 
                             // header 4
                             for ( m=0; m< lvl2_obj.length; m++ ) {
-                                buff = '  ' + '    - ' +lvl2_obj[m]+m + '\n';
+                                //buff = '  ' + '    - ' +lvl2_obj[m]+m + '\n';
+                                buff = '  ' + '    - ' +ordererName + '\n';
                                 fs.appendFileSync(dFile, buff);
                             }
                             // header 4
                             var t = Math.floor(v / nPeerPerOrg) * nPeerPerOrg;
                             for ( m=t; m< v; m++ ) {
-                                buff = '  ' + '    - ' +'peer'+m + '\n';
+                    var t1 = Math.floor(v / nPeerPerOrg) + 1;
+                    var s1 = (m % nPeerPerOrg);
+                    var peerName1 = 'peer'+s1+'.org'+t1+'.'+comName;
+                    //console.log('v: %d, t:%d, t1: %d, s1: %d, peerName1: %s', v, t, t1, s1, peerName1);
+                                buff = '  ' + '    - ' +peerName1 + '\n';
                                 fs.appendFileSync(dFile, buff);
                             }
 
@@ -932,7 +952,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                     var v1 = v+1;
                                     buff = '  ' + '    - FABRIC_CA_SERVER_TLS_ENABLED=true' + '\n';
                                     fs.appendFileSync(dFile, buff);
-                                    buff = '  ' + '    - FABRIC_CA_SERVER_TLS_CERTFILE='+CADir+'/ca.org'+v1+'.example.com-cert.pem'+'\n';
+                                    buff = '  ' + '    - FABRIC_CA_SERVER_TLS_CERTFILE='+CADir+'/ca.org'+v1+'.'+comName+'-cert.pem'+'\n';
                                     fs.appendFileSync(dFile, buff);
                                     buff = '  ' + '    - FABRIC_CA_SERVER_TLS_KEYFILE='+CADir+'/CA_SK'+v+'\n';
                                     fs.appendFileSync(dFile, buff);
@@ -945,7 +965,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
 
                             } else if ( lvl2_key[k] == 'command' ) {
                                 var v1=v+1;
-                                var tmp = lvl1_obj[lvl2_key[k]] + ' '+CADir+"/ca.org"+v1+".example.com-cert.pem --ca.keyfile " + CADir+"/CA_SK"+v+" -b admin:adminpw -d'"
+                                var tmp = lvl1_obj[lvl2_key[k]] + ' '+CADir+"/ca.org"+v1+"."+comName+"-cert.pem --ca.keyfile " + CADir+"/CA_SK"+v+" -b admin:adminpw -d'"
                                 //buff = '  ' + '  ' + lvl2_key[k] + ': ' + lvl1_obj[lvl2_key[k]] + '\n';
                                 buff = '  ' + '  ' + lvl2_key[k] + ': ' + tmp + '\n';
                                 fs.appendFileSync(dFile, buff);
@@ -969,7 +989,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
 
                                 // header 4
                                 var t0 = v+1;
-                                var t1 = 'org'+t0+'.example.com';
+                                var t1 = 'org'+t0+'.'+comName;
                                 var tmp = srcMSPDir+'/peerOrganizations/'+t1+'/ca/:/etc/hyperledger/fabric-ca-server-config';
                                 buff = '  ' + '    - ' + tmp + '\n';
                                 //buff = '  ' + '    - ' +lvl2_obj[m] + '\n';

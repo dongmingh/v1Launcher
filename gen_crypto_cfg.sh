@@ -11,6 +11,7 @@ function printHelp {
    echo "    -o: number of orderers, default=1"
    echo "    -p: number of peers per organization, default=1"
    echo "    -r: number of organization, default=1"
+   echo "    -C: company name, default=example.com"
    echo " "
    echo "Example:"
    echo " ./gen_crypto_cfg.sh -o 1 -p 2 -r 2"
@@ -25,8 +26,9 @@ cfgOutFile=$CWD"/crypto-config.yaml"
 nOrderer=1
 peersPerOrg=1
 nOrg=1
+comName="example.com"
 
-while getopts ":o:p:r:" opt; do
+while getopts ":o:p:r:C:" opt; do
   case $opt in
     # number of orderers
     o)
@@ -44,6 +46,12 @@ while getopts ":o:p:r:" opt; do
     r)
       nOrg=$OPTARG
       echo "nOrg:  $nOrg"
+      ;;
+
+    # company name
+    C)
+      comName=$OPTARG
+      echo "comName:  $comName"
       ;;
 
     # else
@@ -70,7 +78,7 @@ rm -f $cfgOutFile
           for (( i=1; i<=$nOrderer; i++  ))
           do
               echo "    - Name: OrdererOrg$i" >> $cfgOutFile
-              tt=orderer$i".example.com"
+              tt=$comName
               echo "      Domain: $tt" >> $cfgOutFile
               echo "      Specs:" >> $cfgOutFile
               echo "        - Hostname: orderer$i" >> $cfgOutFile
@@ -80,7 +88,7 @@ rm -f $cfgOutFile
           for (( i=1; i<=$nOrg; i++  ))
           do
               echo "    - Name: PeerOrg$i" >> $cfgOutFile
-              tt=org$i".example.com"
+              tt=org$i"."$comName
               echo "      Domain: $tt" >> $cfgOutFile
               echo "      Template:" >> $cfgOutFile
               echo "        Count: $peersPerOrg" >> $cfgOutFile
