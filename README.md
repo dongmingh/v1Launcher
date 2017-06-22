@@ -7,17 +7,17 @@ The network Launcher can execute the following task:
 
 1. generate crypto-config yaml and execute cryptogen to generate crypto
 2. create configtx.yml
-3. create orderer block
+3. create orderer genesis block
 4. create channel configuration transaction
 5. create a docker-compose.yml and launch a network
 
-The usages of each script is given below so that they can be executed separately as needed.  However, the script, networkLauncher.sh, is designed to execute all tasks sequentially.
+The usages of each script is given below so that they can be executed separately as needed.  However, the script, networkLauncher.sh, is designed to execute all tasks listed above sequentially.
 
 ##Code Base
 
-- fabric commit level: f3c61e6cc3b04915081b15bbed000b377b53c4c1
-- fabric-sdk-node commit level: 80d85084f574e593a634459e132eb8a552e80a7e
-- fabric-ca commit level: 4f8666363c13c48327edd4e75403a56b806d745b
+- fabric commit level: 3a71bff55c631c8ca02173c34313f42fa67a7ad0
+- fabric-sdk-node commit level: 503c88366559158f0f6f29cb67caeb0e074660c2
+- fabric-ca commit level: 1424b3378df7086a651c533280cdcc3a2055b033
 
 
 #NetworkLauncher.sh
@@ -29,11 +29,12 @@ This is the main script to execute all tasks.
 
     ./NetworkLauncher.sh [opt] [value]
        options:
-         -z: number of CAs
+         -x: number of CAs
          -d: ledger database type, default=goleveldb
          -f: profile string, default=test
          -h: hash type, default=SHA2
          -k: number of kafka, default=solo
+         -z: number of zookeepers, default=0
          -n: number of channels, default=1
          -o: number of orderers, default=1
          -p: number of peers per organization, default=1
@@ -48,9 +49,9 @@ This is the main script to execute all tasks.
 
     
 ##Example:
-    ./networkLauncher.sh -o 1 -z 2 -r 2 -p 2 -k 1 -n 2 -t kafka -f test -w 10.120.223.35 
-    ./networkLauncher.sh -o 1 -z 2 -r 2 -p 2 -n 1 -f test -w 10.120.223.35
-    ./NetworkLauncher.sh -z 2 -o 1 -r 2 -p 2 -k 1 -n 2 -t kafka -f test -w 10.120.223.35 -S $GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config
+    ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -k 1 -z 1 -n 2 -t kafka -f test -w 10.120.223.35 
+    ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -n 1 -f test -w 10.120.223.35
+    ./NetworkLauncher.sh -o 4 -x 2 -r 2 -p 2 -k 4 -z 4 -n 2 -t kafka -f test -w 10.120.223.35 -S $GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config
 
 The above command will invoke cryptogen, cfgtxgen, generate orderer block, channel transaction and launch network.
 

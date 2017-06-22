@@ -75,14 +75,15 @@ rm -f $cfgOutFile
 
 #begin process
           echo "OrdererOrgs:" >> $cfgOutFile
-          for (( i=1; i<=$nOrderer; i++  ))
-          do
-              echo "    - Name: OrdererOrg$i" >> $cfgOutFile
+          #for (( i=1; i<=$nOrderer; i++  ))
+          #do
+              #echo "    - Name: OrdererOrg$i" >> $cfgOutFile
+              echo "    - Name: Orderer" >> $cfgOutFile
               tt=$comName
               echo "      Domain: $tt" >> $cfgOutFile
-              echo "      Specs:" >> $cfgOutFile
-              echo "        - Hostname: orderer$i" >> $cfgOutFile
-          done
+              echo "      Template:" >> $cfgOutFile
+              echo "        Count: $nOrderer" >> $cfgOutFile
+          #done
 
           echo "PeerOrgs:" >> $cfgOutFile
           for (( i=1; i<=$nOrg; i++  ))

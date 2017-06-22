@@ -17,7 +17,7 @@ function printHelp {
    echo "       -k: number of brokers "
    echo "       -r: number of organiztions "
    echo "       -S: TLS base directory "
-   echo "       -z: number of ca "
+   echo "       -x: number of ca "
    echo "       -F: local MSP base directory, default=/root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config"
    echo "       -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config"
    echo " "
@@ -31,8 +31,8 @@ function printHelp {
    echo "       -c: batch timeout [10s|max secs before send an unfilled batch] "
    echo " "
    echo "Example:"
-   echo "   ./gen_network.sh -a create -z 2 -p 2 -r 2 -o 1 -k 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config "
-   echo "   ./gen_network.sh -a create -z 2 -p 2 -r 2 -o 1 -k 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config -S /root/gopath/src/github.com/hyperledger/fabric-sdk-node/test/fixtures/tls "
+   echo "   ./gen_network.sh -a create -x 2 -p 2 -r 2 -o 1 -k 1 -z 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config "
+   echo "   ./gen_network.sh -a create -x 2 -p 2 -r 2 -o 1 -k 1 -z 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config -S /root/gopath/src/github.com/hyperledger/fabric-sdk-node/test/fixtures/tls "
    echo " "
    exit
 }
@@ -41,7 +41,7 @@ function printHelp {
 nBroker=0
 nPeerPerOrg=1
 
-while getopts ":z:l:d:b:c:t:a:o:k:p:r:F:G:S:C:" opt; do
+while getopts ":x:z:l:d:b:c:t:a:o:k:p:r:F:G:S:C:" opt; do
   case $opt in
     # peer environment options
     S)
@@ -49,7 +49,7 @@ while getopts ":z:l:d:b:c:t:a:o:k:p:r:F:G:S:C:" opt; do
       export TLSDIR=$TLSDIR
       echo "TLSDIR: $TLSDIR"
       ;;
-    z)
+    x)
       nCA=$OPTARG
       echo "number of CA: $nCA"
       ;;
@@ -102,6 +102,10 @@ while getopts ":z:l:d:b:c:t:a:o:k:p:r:F:G:S:C:" opt; do
     k)
       nBroker=$OPTARG
       echo "# of Broker: $nBroker"
+      ;;
+    z)
+      nZoo=$OPTARG
+      echo "number of zookeeper: $Zoo"
       ;;
     p)
       nPeerPerOrg=$OPTARG
@@ -182,9 +186,9 @@ fi
 
 ## echo "N1=$N1 VP=$VP nPeerPerOrg=$nPeerPerOrg VPN=$VPN"
 
-echo "node json2yml.js $jsonFILE $nPeerPerOrg $nOrderer $nBroker $nOrg $dbType $nCA"
+echo "node json2yml.js $jsonFILE $nPeerPerOrg $nOrderer $nBroker $nZoo $nOrg $dbType $nCA"
 
-node json2yml.js $jsonFILE $nPeerPerOrg $nOrderer $nBroker $nOrg $dbType $nCA
+node json2yml.js $jsonFILE $nPeerPerOrg $nOrderer $nBroker $nZoo $nOrg $dbType $nCA
 
 #fix CA _sk in docker-compose.yml
 CWD=$PWD
@@ -245,11 +249,11 @@ if [ $Req == "create" ]; then
    docker-compose -f docker-compose.yml up -d --force-recreate
    #docker-compose -f docker-compose.yml up -d --force-recreate $VPN
    ##docker-compose -f docker-compose.yml up -d --force-recreate $VPN
-   for ((i=1; i<$nOrderer; i++))
-   do
-       tmpOrd="orderer"$i
-       docker-compose -f docker-compose.yml up -d $tmpOrd
-   done
+   #for ((i=1; i<$nOrderer; i++))
+   #do
+       #tmpOrd="orderer"$i
+       #docker-compose -f docker-compose.yml up -d $tmpOrd
+   #done
 fi
 
 if [ $Req == "add" ]; then

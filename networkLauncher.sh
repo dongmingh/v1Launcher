@@ -11,11 +11,12 @@ function printHelp {
 
    echo "Usage: "
    echo " ./networkLauncher.sh [opt] [value] "
-   echo "    -z: number of ca, default=0"
+   echo "    -x: number of ca, default=0"
    echo "    -d: ledger database type, default=goleveldb"
    echo "    -f: profile string, default=test"
    echo "    -h: hash type, default=SHA2"
    echo "    -k: number of kafka, default=solo"
+   echo "    -z: number of zookeepers, default=0"
    echo "    -n: number of channels, default=1"
    echo "    -o: number of orderers, default=1"
    echo "    -p: number of peers per organization, default=1"
@@ -30,9 +31,10 @@ function printHelp {
    echo "    -C: company name, default=example.com "
    echo " "
    echo " example: "
-   echo " ./networkLauncher.sh -o 1 -z 2 -r 2 -p 2 -k 1 -n 2 -t kafka -f test -w 10.120.223.35 "
-   echo " ./networkLauncher.sh -o 1 -z 2 -r 2 -p 2 -n 1 -f test -w 10.120.223.35 "
-   echo " ./networkLauncher.sh -o 1 -z 2 -r 2 -p 2 -k 1 -n 2 -t kafka -f test -w 10.120.223.35 -S $GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config "
+   echo " ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -k 1 -n 2 -t kafka -f test -w 10.120.223.35 "
+   echo " ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -n 1 -f test -w 10.120.223.35 "
+   echo " ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -k 1 -n 2 -t kafka -f test -w 10.120.223.35 -S $GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config "
+   echo " ./networkLauncher.sh -o 4 -x 2 -r 2 -p 2 -k 4 -z 4 -n 2 -t kafka -f test -w 10.120.223.35 -S $GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config "
    exit
 }
 
@@ -40,6 +42,7 @@ function printHelp {
 PROFILE_STRING="test"
 ordServType="solo"
 nKafka=0
+nZoo=0
 nCA=0
 nOrderer=1
 nOrg=1
@@ -53,10 +56,10 @@ HostIP1="0.0.0.0"
 comName="example.com"
 
 
-while getopts ":z:d:f:h:k:n:o:p:r:t:s:c:w:F:G:S:C:" opt; do
+while getopts ":z:x:d:f:h:k:n:o:p:r:t:s:c:w:F:G:S:C:" opt; do
   case $opt in
     # peer environment options
-    z)
+    x)
       nCA=$OPTARG
       echo "number of CA: $nCA"
       ;;
@@ -80,6 +83,10 @@ while getopts ":z:d:f:h:k:n:o:p:r:t:s:c:w:F:G:S:C:" opt; do
       echo "number of kafka: $nKafka"
       ;;
 
+    z)
+      nZoo=$OPTARG
+      echo "number of zookeeper: $nZoo"
+      ;;
     n)
       nChannel=$OPTARG
       echo "number of channels: $nChannel"
@@ -161,7 +168,7 @@ done
 #fi
 
 # sanity check
-echo " PROFILE_STRING=$PROFILE_STRING, ordServType=$ordServType, nKafka=$nKafka, nOrderer=$nOrderer "
+echo " PROFILE_STRING=$PROFILE_STRING, ordServType=$ordServType, nKafka=$nKafka, nOrderer=$nOrderer, nZoo=$nZoo"
 echo " nOrg=$nOrg, nPeersPerOrg=$nPeersPerOrg, ledgerDB=$ledgerDB, hashType=$hashType, secType=$secType, comName=$comName"
 
 CHAN_PROFILE=$PROFILE_STRING"Channel"
@@ -213,7 +220,7 @@ echo "./gen_configtx_cfg.sh -o $nOrderer -k $nKafka -p $nPeersPerOrg -r $nOrg -h
 
 echo " "
 echo "        ####################################################### "
-echo "        #             create orderer.block                    # "
+echo "        #         create orderer genesis block                # "
 echo "        ####################################################### "
 echo " "
 CFGGenDir=$GOPATH/src/github.com/hyperledger/fabric/build/bin
@@ -254,10 +261,10 @@ echo "generate docker-compose.yml ..."
 echo "current working directory: $PWD"
 nPeers=$[ nPeersPerOrg * nOrg ]
 echo "number of peers: $nPeers"
-echo "./gen_network.sh -a create -z $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir -S $TLSDir"
+echo "./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -z $nZoo -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir -S $TLSDir"
 if [ -z $TLSDir ]; then
-    ./gen_network.sh -a create -z $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir -C $comName
+    ./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -z $nZoo -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir -C $comName
 else
-    ./gen_network.sh -a create -z $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir -S $TLSDir -C $comName
+    ./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -z $nZoo -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir -S $TLSDir -C $comName
 fi
 

@@ -114,7 +114,10 @@ console.log('number of Orderer: ', addOrderer);
 var addBroker = parseInt(process.argv[5]);
 console.log('number of Kafka Broker: ', addBroker);
 
-var nOrg = parseInt(process.argv[6]);;
+var nZoo = parseInt(process.argv[6]);;
+console.log('number of zookeepers: ', nZoo);
+
+var nOrg = parseInt(process.argv[7]);;
 console.log('number of orgs: ', nOrg);
 
 var addVP = nPeerPerOrg*nOrg;
@@ -122,14 +125,14 @@ console.log('number of peer: ', addVP);
 
 //console.log(' input argv length', process.argv.length);
 var dbType = 'none';
-if (process.argv.length == 8) {
-   dbType = process.argv[7];
+if (process.argv.length > 8) {
+   dbType = process.argv[8];
 }
 console.log('DB type: ', dbType);
 
 var addCA = 0;
-if (process.argv.length == 9) {
-   addCA = parseInt(process.argv[8]);
+if (process.argv.length > 9) {
+   addCA = parseInt(process.argv[9]);
 }
 console.log('addCA: ', addCA);
 
@@ -323,7 +326,9 @@ for ( i0=0; i0<top_key.length; i0++ ) {
              } else if (lvl1_key[i] == 'orderer' ) {
                 for ( v = 0; v < addOrderer; v++ ) {
                     //tmp_name = lvl1_key[i] + v;
-                    ordererName = 'orderer1.'+comName;
+                    var v1 = v+1;
+                    //ordererName = 'orderer1.'+comName;
+                    ordererName = 'orderer'+v+'.'+comName;
                     buff = '  ' + ordererName +':' + '\n';
                     fs.appendFileSync(dFile, buff);
 
@@ -381,14 +386,14 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                             fs.appendFileSync(dFile, buff);
                                     } else if ( lvl3_key[m] == 'ORDERER_GENERAL_LOCALMSPID' ) {
                                             var t = v+1;
-                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + 'OrdererOrg' +t+ '\n';
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + 'OrdererOrg' + '\n';
                                             fs.appendFileSync(dFile, buff);
                                     } else if ( lvl3_key[m] == 'ORDERER_GENERAL_LOCALMSPDIR' ) {
                                             var t = v+1;
                                             // This looks wrong; how would we get ordererOrg1Orderer2 ? 
                                             // buff = '  ' + '    - ' + lvl3_key[m] + '=' + ordererMSPDir + '/ordererOrg' + '' +t+'/orderers/ordererOrg'+t+'orderer'+t + '\n';
                                             // For now crytogen tool only puts all orderers into one ordererOrg1 anyways, so:
-                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + ordererMSPDir + '/'+comName+'/orderers/orderer'+t+'.'+comName+'/msp' + '\n';
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + ordererMSPDir + '/'+comName+'/orderers/'+ordererName+'/msp' + '\n';
                                             //buff = '  ' + '    - ' + lvl3_key[m] + '=' + ordererMSPDir + '/orderer'+t+'.example.com/orderers/orderer'+t+'.orderer'+t+'.example.com/msp' + '\n';
                                             fs.appendFileSync(dFile, buff);
                                     } else {
@@ -400,7 +405,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                 if ( TLS.toUpperCase() == 'ENABLED' ) {
                                     var v1 = v+1;
                                     //var OrdTLSDir = MSPDir + '/ordererOrganizations/orderer' + v1 +'.example.com/orderers/orderer' + v1 + '.orderer' +v1 + '.example.com/msp';
-                                    var OrdTLSDir = MSPDir + '/ordererOrganizations/'+comName+'/orderers/orderer' +v1 + '.'+comName+'/tls';
+                                    var OrdTLSDir = MSPDir + '/ordererOrganizations/'+comName+'/orderers/'+ordererName+'/tls';
                                     var org1TLSDir = MSPDir + '/peerOrganizations/org1.'+comName+'/tls';
                                     var org2TLSDir = MSPDir + '/peerOrganizations/org2.'+comName+'/tls';
 
@@ -462,8 +467,8 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                 buff = '  ' + '  ' + lvl2_key[k] + ': ' + '\n';
                                 fs.appendFileSync(dFile, buff);
 
-                                buff = '  ' + '    - ' + 'zookeeper' + '\n' ;
-                                fs.appendFileSync(dFile, buff);
+                                //buff = '  ' + '    - ' + 'zookeeper' + '\n' ;
+                                //fs.appendFileSync(dFile, buff);
                                 if ( KAFKA==1 ) {
                                     for (n=0; n<addBroker; n++) {
                                         buff = '  ' + '    - ' + 'kafka' + n + '\n' ;
@@ -509,6 +514,15 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                     } else if ( lvl3_key[m] == 'KAFKA_DEFAULT_REPLICATION_FACTOR' ) {
                                         buff = '  ' + '    - ' + lvl3_key[m] + '=' + addBroker + '\n';
                                         fs.appendFileSync(dFile, buff);
+                                    } else if ( lvl3_key[m] == 'KAFKA_ZOOKEEPER_CONNECT' ) {
+                                        var zp=2181;
+                                        var ktmp='zookeeper0:2181';
+                                        for (l=1; l<nZoo; l++) {
+                                            zp=zp+1000;
+                                            ktmp=ktmp+',zookeeper'+l+':'+zp;
+                                        }
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + ktmp + '\n';
+                                            fs.appendFileSync(dFile, buff);
                                     } else {
                                         buff = '  ' + '    - ' + lvl3_key[m] + '=' +lvl2_obj[lvl3_key[m]] + '\n';
                                         fs.appendFileSync(dFile, buff);
@@ -534,6 +548,18 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                 buff = '  ' + '    - ' + tmp_port +':' + '9092' + '\n' ;
                                 //buff = '  ' + '    - ' + tmp_port +':' + tmp_port + '\n' ;
                                 fs.appendFileSync(dFile, buff);
+                        } else if ( lvl2_key[k] == 'depends_on' ) {
+                                lvl2_obj = lvl1_obj[lvl2_key[k]];
+                                lvl3_key = Object.keys(lvl2_obj);
+
+                                buff = '  ' + '  ' + lvl2_key[k] + ': ' + '\n';
+                                fs.appendFileSync(dFile, buff);
+                                //tmp_port = kafkaPort + v;
+
+                                        for (l=0; l<nZoo; l++) {
+                                            buff = '  ' + '    - ' + 'zookeeper'+l + '\n';
+                                            fs.appendFileSync(dFile, buff);
+                                        }
                         } else {
                             buff = '  ' + '  ' + lvl2_key[k] + ': ' + '\n';
                             fs.appendFileSync(dFile, buff);
@@ -549,8 +575,12 @@ for ( i0=0; i0<top_key.length; i0++ ) {
 
                 }
              } else if (lvl1_key[i] == 'zookeeper' ) {
-                if ( KAFKA == 1 ) {
-                    tmp_name = lvl1_key[i];
+                for ( v = 0; v < nZoo; v++ ) {
+                    var zbase=2181;
+                    var zport=2181+v*1000;
+                    var zport1=zport+1;
+                    console.log('zport:zport1=%d:%d',zport,zport1);
+                    tmp_name = lvl1_key[i] + v;
                     buff = '  ' + tmp_name +':' + '\n';
                     fs.appendFileSync(dFile, buff);
 
@@ -565,13 +595,44 @@ for ( i0=0; i0<top_key.length; i0++ ) {
 
                                 // header 4
                                 for ( m=0; m< lvl3_key.length; m++ ) {
+                                    if ( lvl3_key[m] == 'ZOO_MY_ID' ) {
+                                        var v1=v+1;
+                                        buff = '  ' + '    - ' + lvl3_key[m] + '=' + v1 + '\n';
+                                        fs.appendFileSync(dFile, buff);
+                                    } else if ( lvl3_key[m] == 'ZOO_PORT' ) {
+                                        buff = '  ' + '    - ' + lvl3_key[m] + '=' + zport + '\n';
+                                        fs.appendFileSync(dFile, buff);
+                                    } else if ( lvl3_key[m] == 'ZOO_SERVERS' ) {
+                                        var z1=zbase+1;
+                                        var z2=zbase+2;
+                                        var tmp='server.1='+'zookeeper0'+':'+z1+':'+z2+':participant';
+                                        for (l=1; l< nZoo; l++) {
+                                            z1=z1+1000;
+                                            z2=z2+1000;
+                                            var l1=l+1;
+                                            tmp=tmp+' server.'+l1+'='+'zookeeper'+l+':'+z1+':'+z2+':participant';
+                                        }
+                                        buff = '  ' + '    - ' + lvl3_key[m] + '=' + tmp + '\n';
+                                        fs.appendFileSync(dFile, buff);
+                                    } else {
                                         buff = '  ' + '    - ' + lvl3_key[m] + '=' +lvl2_obj[lvl3_key[m]] + '\n';
                                         fs.appendFileSync(dFile, buff);
+                                    }
+
                                 }
                         } else if ( ( lvl2_key[k] == 'image' ) || ( lvl2_key[k] == 'command' ) || ( lvl2_key[k] == 'working_dir' ) 
                                     || ( lvl2_key[k] == 'restart') ) {
                             buff = '  ' + '  ' + lvl2_key[k] + ': ' + lvl1_obj[lvl2_key[k]] + '\n';
                             fs.appendFileSync(dFile, buff);
+                        } else if ( lvl2_key[k] == 'ports' ) {
+                            buff = '  ' + '  ' + lvl2_key[k] + ':' + '\n';
+                            fs.appendFileSync(dFile, buff);
+                                        for (l=0; l< nZoo; l++) {
+                                            var tmp = zport+l;
+                                            buff = '  ' + '    - ' + tmp + ':' + tmp + '\n';
+                                            fs.appendFileSync(dFile, buff);
+                                        }
+
                         } else if ( lvl2_key[k] == 'container_name' ) {
                             buff = '  ' + '  ' + lvl2_key[k] + ': ' + tmp_name + '\n';
                             fs.appendFileSync(dFile, buff);

@@ -224,15 +224,15 @@ do
       elif [ "$t1" == "Addresses:" ]; then
           echo "$line" >> $cfgOutFile
           #echo "         - $peerIP":"$ordererPort, $peerIP":"$[ ordererPort + 1 ], $peerIP":"$[ ordererPort + 2 ]" >> $cfgOutFile
-          tmp="orderer1."$comName":"$ordererPort
+          #tmp="orderer1."$comName":"$ordererPort
           tmpPort=$ordererPort
-          for (( i=2; i<=$nOrderer; i++  ))
+          for (( i=1; i<=$nOrderer; i++  ))
           do
               j=$[ i - 1 ]
-              tmpPort=$[ tmpPort + j ]
-              tmp=$tmp", "$peerIP":"$tmpPort
+              tmpAddr="orderer"$j"."$comName
+              tmp=$tmpAddr":7050"
+              echo "         - $tmp" >> $cfgOutFile
           done
-          echo "         - $tmp" >> $cfgOutFile
 
       elif [ "$t1" == "Brokers:" ]; then
           echo "        $t1" >> $cfgOutFile
@@ -247,7 +247,8 @@ do
           #for (( i=1; i<=$nOrderer; i++ ))
           for (( i=1; i<=1; i++ ))
           do
-             echo "                - $t2$i" >> $cfgOutFile
+             echo "                - $t2" >> $cfgOutFile
+             #echo "                - $t2$i" >> $cfgOutFile
           done
 
       elif [ "$t2" == "&OrdererOrg" ]; then
@@ -258,7 +259,8 @@ do
           for (( i=1; i<=1; i++ ))
           do
              j=$[ peersPerOrg * ( i - 1 ) + 1 ]
-             tmp="OrdererOrg"$i
+             #tmp="OrdererOrg"$i
+             tmp="OrdererOrg"
              tt="Orderer"$i"MSP"
              echo "    - &$tmp" >> $cfgOutFile
              echo "        Name: $tmp" >> $cfgOutFile
@@ -266,16 +268,16 @@ do
              #echo "        ID: $tt" >> $cfgOutFile
              ordDir=$MSPBaseDir"/ordererOrganizations/"$comName"/msp"
              echo "        MSPDir: $ordDir" >> $cfgOutFile
-             echo "        AdminPrincipal: Role.MEMBER" >> $cfgOutFile
+             echo "        #AdminPrincipal: Role.MEMBER" >> $cfgOutFile
 
              echo "" >> $cfgOutFile
-             echo "        BCCSP:" >> $cfgOutFile
-             echo "            Default: SW" >> $cfgOutFile
-             echo "            SW:" >> $cfgOutFile
-             echo "                Hash: $hashType" >> $cfgOutFile
-             echo "                Security: $SecType" >> $cfgOutFile
-             echo "                FileKeyStore:" >> $cfgOutFile
-             echo "                    KeyStore:" >> $cfgOutFile
+#             echo "        BCCSP:" >> $cfgOutFile
+#             echo "            Default: SW" >> $cfgOutFile
+#             echo "            SW:" >> $cfgOutFile
+#             echo "                Hash: $hashType" >> $cfgOutFile
+#             echo "                Security: $SecType" >> $cfgOutFile
+#             echo "                FileKeyStore:" >> $cfgOutFile
+#             echo "                    KeyStore:" >> $cfgOutFile
              echo "" >> $cfgOutFile
 
           done
@@ -291,16 +293,16 @@ do
              #echo "        ID: $tmp" >> $cfgOutFile
              peerDir=$MSPBaseDir"/peerOrganizations/org"$i"."$comName"/msp"
              echo "        MSPDir: $peerDir" >> $cfgOutFile
-             echo "        AdminPrincipal: Role.MEMBER" >> $cfgOutFile
+             echo "        #AdminPrincipal: Role.MEMBER" >> $cfgOutFile
 
              echo "" >> $cfgOutFile
-             echo "        BCCSP:" >> $cfgOutFile
-             echo "            Default: SW" >> $cfgOutFile
-             echo "            SW:" >> $cfgOutFile
-             echo "                Hash: $hashType" >> $cfgOutFile
-             echo "                Security: $SecType" >> $cfgOutFile
-             echo "                FileKeyStore:" >> $cfgOutFile
-             echo "                    KeyStore:" >> $cfgOutFile
+#             echo "        BCCSP:" >> $cfgOutFile
+#             echo "            Default: SW" >> $cfgOutFile
+#             echo "            SW:" >> $cfgOutFile
+#             echo "                Hash: $hashType" >> $cfgOutFile
+#             echo "                Security: $SecType" >> $cfgOutFile
+#             echo "                FileKeyStore:" >> $cfgOutFile
+#             echo "                    KeyStore:" >> $cfgOutFile
              echo "" >> $cfgOutFile
 
              #tmpPort=$[ HostPort + peersPerOrg * ( i - 1 ) ]
