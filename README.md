@@ -15,9 +15,9 @@ The usages of each script is given below so that they can be executed separately
 
 ##Code Base
 
-- fabric commit level: 3a71bff55c631c8ca02173c34313f42fa67a7ad0
-- fabric-sdk-node commit level: 503c88366559158f0f6f29cb67caeb0e074660c2
-- fabric-ca commit level: 1424b3378df7086a651c533280cdcc3a2055b033
+- fabric commit level: v1.0.0-beta
+- fabric-sdk-node commit level: v1.0.0-beta
+- fabric-ca commit level: v1.0.0-beta
 
 
 #NetworkLauncher.sh
@@ -41,17 +41,16 @@ This is the main script to execute all tasks.
          -r: number of organizations, default=1
          -s: security type, default=256
          -t: ledger orderer service type [solo|kafka], default=solo
-         -c: crypto directory, default=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen
          -w: host ip 1, default=0.0.0.0
          -F: local MSP base directory, default=/root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config
          -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config
-         -S: TLS base directory
+         -S: TLS enablement [enabled|disabled], default=disabled
 
     
 ##Example:
     ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -k 1 -z 1 -n 2 -t kafka -f test -w 10.120.223.35 
     ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -n 1 -f test -w 10.120.223.35
-    ./NetworkLauncher.sh -o 4 -x 2 -r 2 -p 2 -k 4 -z 4 -n 2 -t kafka -f test -w 10.120.223.35 -S $GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config
+    ./NetworkLauncher.sh -o 4 -x 2 -r 2 -p 2 -k 4 -z 4 -n 2 -t kafka -f test -w 10.120.223.35 -S enabled
 
 The above command will invoke cryptogen, cfgtxgen, generate orderer block, channel transaction and launch network.
 

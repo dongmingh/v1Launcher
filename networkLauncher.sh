@@ -23,18 +23,17 @@ function printHelp {
    echo "    -r: number of organizations, default=1"
    echo "    -s: security type, default=256"
    echo "    -t: ledger orderer service type [solo|kafka], default=solo"
-   echo "    -c: crypto directory, default=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen"
    echo "    -w: host ip, default=0.0.0.0"
    echo "    -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config"
    echo "    -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config"
-   echo "    -S: TLS base directory "
+   echo "    -S: TLS enablement [enabled|disabled], default=disabled"
    echo "    -C: company name, default=example.com "
    echo " "
    echo " example: "
    echo " ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -k 1 -n 2 -t kafka -f test -w 10.120.223.35 "
    echo " ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -n 1 -f test -w 10.120.223.35 "
-   echo " ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -k 1 -n 2 -t kafka -f test -w 10.120.223.35 -S $GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config "
-   echo " ./networkLauncher.sh -o 4 -x 2 -r 2 -p 2 -k 4 -z 4 -n 2 -t kafka -f test -w 10.120.223.35 -S $GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config "
+   echo " ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -k 1 -n 2 -t kafka -f test -w 10.120.223.35 -S enabled "
+   echo " ./networkLauncher.sh -o 4 -x 2 -r 2 -p 2 -k 4 -z 4 -n 2 -t kafka -f test -w 10.120.223.35 -S enabled "
    exit
 }
 
@@ -56,7 +55,7 @@ HostIP1="0.0.0.0"
 comName="example.com"
 
 
-while getopts ":z:x:d:f:h:k:n:o:p:r:t:s:c:w:F:G:S:C:" opt; do
+while getopts ":z:x:d:f:h:k:n:o:p:r:t:s:w:F:G:S:C:" opt; do
   case $opt in
     # peer environment options
     x)
@@ -117,11 +116,6 @@ while getopts ":z:x:d:f:h:k:n:o:p:r:t:s:c:w:F:G:S:C:" opt; do
       echo "orderer service type: $ordServType"
       ;;
 
-    c)
-      CryptoBaseDir=$OPTARG
-      echo "CryptoBaseDir: $CryptoBaseDir"
-      ;;
-
     w)
       HostIP1=$OPTARG
       echo "HostIP1:  $HostIP1"
@@ -140,7 +134,10 @@ while getopts ":z:x:d:f:h:k:n:o:p:r:t:s:c:w:F:G:S:C:" opt; do
       ;;
 
     S)
-      TLSDir=$OPTARG
+      TLSEnabled=`echo $OPTARG | tr [A-Z] [a-z]`
+      if [ $TLSEnabled == "enabled" ]; then
+          TLSDir=$CryptoBaseDir"/crypto-config"
+      fi
       echo "TLSDir: $TLSDir"
       ;;
 
