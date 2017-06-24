@@ -656,6 +656,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                     var t = Math.floor(v / nPeerPerOrg) + 1;
                     var s = (v % nPeerPerOrg);
                     var peerName = 'peer'+s+'.org'+t+'.'+comName;
+                    var peer0Name = 'peer0.org'+t+'.'+comName;
                     //console.log('v: %d, peerName: %s', v, peerName);
                     tmp_name = lvl1_key[i] + v;
                     tmp_port = vp0Port + v;
@@ -694,7 +695,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                         fs.appendFileSync(dFile, buff);
                                     } else if ( lvl3_key[m] == 'CORE_PEER_GOSSIP_BOOTSTRAP' ) {
                                         if ( v != 0 ) {
-                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + peerName +':'+ vp0Port + '\n';
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + peer0Name +':'+ '7051' + '\n';
                                             fs.appendFileSync(dFile, buff);
                                         }
                                     } else if ( lvl3_key[m] == 'CORE_PEER_DISCOVERY_ROOTNODE' ) {
@@ -718,7 +719,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                         }
                                     } else if ( lvl3_key[m] == 'CORE_PEER_GOSSIP_ORGLEADER' ) {
                                         if ( (v%nPeerPerOrg) == 0 ) {
-                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + 'true' + '\n';
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + 'false' + '\n';
                                             fs.appendFileSync(dFile, buff);
                                         } else {
                                             buff = '  ' + '    - ' + lvl3_key[m] + '=' + 'false' + '\n';

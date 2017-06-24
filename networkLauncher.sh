@@ -170,7 +170,7 @@ echo " nOrg=$nOrg, nPeersPerOrg=$nPeersPerOrg, ledgerDB=$ledgerDB, hashType=$has
 
 CHAN_PROFILE=$PROFILE_STRING"Channel"
 ORDERER_PROFILE=$PROFILE_STRING"OrgsOrdererGenesis"
-ORG_PROFILE=$PROFILE_STRING"OrgsChannel"
+ORG_PROFILE=$PROFILE_STRING"orgschannel"
 
 CWD=$PWD
 echo "current working directory: $CWD"

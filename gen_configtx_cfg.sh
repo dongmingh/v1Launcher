@@ -218,7 +218,7 @@ do
           echo "    $tmp:" >> $cfgOutFile
 
       elif [ "$t1" == "&ProfileOrgString" ]; then
-          tmp=$PROFILE_STRING"OrgsChannel"
+          tmp=$PROFILE_STRING"orgschannel"
           echo "    $tmp:" >> $cfgOutFile
 
       elif [ "$t1" == "Addresses:" ]; then
