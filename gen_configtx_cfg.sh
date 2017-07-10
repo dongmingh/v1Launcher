@@ -306,7 +306,8 @@ do
              echo "" >> $cfgOutFile
 
              #tmpPort=$[ HostPort + peersPerOrg * ( i - 1 ) ]
-             tmpPort=$[ peerPort + peersPerOrg * ( i - 1 ) ]
+             #tmpPort=$[ peerPort + peersPerOrg * ( i - 1 ) ]
+             tmpPort=7051
              tmpHost="peer0.org"$i"."$comName
              echo "        AnchorPeers:" >> $cfgOutFile
              echo "            - Host: $tmpHost" >> $cfgOutFile
