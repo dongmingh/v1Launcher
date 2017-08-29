@@ -1,8 +1,13 @@
 #!/bin/bash
 
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
 
 # default directories
-FabricDir="$GOPATH//src/github.com/hyperledger/fabric"
+FabricDir="$GOPATH/src/github.com/hyperledger/fabric"
 ordererDir="$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations"
 MSPDir="$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config"
 SRCMSPDir="/opt/hyperledger/fabric/msp/crypto-config"
@@ -11,6 +16,7 @@ function printHelp {
 
    echo "Usage: "
    echo " ./networkLauncher.sh [opt] [value] "
+   echo "    -a: nework action [up]down], default=up"
    echo "    -x: number of ca, default=0"
    echo "    -d: ledger database type, default=goleveldb"
    echo "    -f: profile string, default=test"
@@ -56,9 +62,22 @@ HostIP1="0.0.0.0"
 comName="example.com"
 
 
-while getopts ":z:x:d:f:h:k:n:o:p:r:t:s:w:F:G:S:C:" opt; do
+while getopts ":a:z:x:d:f:h:k:n:o:p:r:t:s:w:F:G:S:C:" opt; do
   case $opt in
     # peer environment options
+    a)
+      tt=$OPTARG
+      action=$(echo $tt | awk '{print tolower($tt)}')
+      echo "network action: $action"
+      if [ $action == "down" ]; then
+          ./clearNetwork.sh
+          exit;
+      elif [ $action != "up" ]; then
+          echo "invalid network action option: $action"
+          printHelp
+          exit;
+      fi
+      ;;
     x)
       nCA=$OPTARG
       echo "number of CA: $nCA"

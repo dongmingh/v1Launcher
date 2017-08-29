@@ -1,10 +1,14 @@
 #!/bin/bash
 
 #
-# usage: ./gen_network.sh [opt] [value]
-# fabric coomit: f3c61e6cc3b04915081b15bbed000b377b53c4c1
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
 #
 
+#
+# usage: ./gen_network.sh [opt] [value]
+#
 
 
 function printHelp {
@@ -18,7 +22,7 @@ function printHelp {
    echo "       -r: number of organiztions "
    echo "       -S: TLS base directory "
    echo "       -x: number of ca "
-   echo "       -F: local MSP base directory, default=/root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config"
+   echo "       -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config"
    echo "       -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config"
    echo " "
    echo "    peer environment variables"
@@ -40,6 +44,8 @@ function printHelp {
 #init var
 nBroker=0
 nPeerPerOrg=1
+MSPDIR="$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config"
+SRCMSPDIR="/opt/hyperledger/fabric/msp/crypto-config"
 
 while getopts ":x:z:l:d:b:c:t:a:o:k:p:r:F:G:S:C:" opt; do
   case $opt in
@@ -65,14 +71,14 @@ while getopts ":x:z:l:d:b:c:t:a:o:k:p:r:F:G:S:C:" opt; do
 
     # orderer environment options
     b)
-      ORDERER_GENESIS_BATCHSIZE_MAXMESSAGECOUNT=$OPTARG
-      export ORDERER_GENESIS_BATCHSIZE_MAXMESSAGECOUNT=$ORDERER_GENESIS_BATCHSIZE_MAXMESSAGECOUNT
-      echo "ORDERER_GENESIS_BATCHSIZE_MAXMESSAGECOUNT: $ORDERER_GENESIS_BATCHSIZE_MAXMESSAGECOUNT"
+      CONFIGTX_ORDERER_BATCHSIZE_MAXMESSAGECOUNT=$OPTARG
+      export CONFIGTX_ORDERER_BATCHSIZE_MAXMESSAGECOUNT=$CONFIGTX_ORDERER_BATCHSIZE_MAXMESSAGECOUNT
+      echo "CONFIGTX_ORDERER_BATCHSIZE_MAXMESSAGECOUNT: $CONFIGTX_ORDERER_BATCHSIZE_MAXMESSAGECOUNT"
       ;;
     c)
-      ORDERER_GENESIS_BATCHTIMEOUT=$OPTARG
-      export ORDERER_GENESIS_BATCHTIMEOUT=$ORDERER_GENESIS_BATCHTIMEOUT
-      echo "ORDERER_GENESIS_BATCHTIMEOUT: $ORDERER_GENESIS_BATCHTIMEOUT"
+      CONFIGTX_ORDERER_BATCHTIMEOUT=$OPTARG
+      export CONFIGTX_ORDERER_BATCHTIMEOUT=$CONFIGTX_ORDERER_BATCHTIMEOUT
+      echo "CONFIGTX_ORDERER_BATCHTIMEOUT: $CONFIGTX_ORDERER_BATCHTIMEOUT"
       ;;
     F)
       SRCMSPDIR=$OPTARG
@@ -86,10 +92,10 @@ while getopts ":x:z:l:d:b:c:t:a:o:k:p:r:F:G:S:C:" opt; do
       ;;
 
     t)
-      ORDERER_GENESIS_ORDERERTYPE=$OPTARG
-      export ORDERER_GENESIS_ORDERERTYPE=$ORDERER_GENESIS_ORDERERTYPE
-      echo "ORDERER_GENESIS_ORDERERTYPE: $ORDERER_GENESIS_ORDERERTYPE"
-      if [ $nBroker == 0 ] && [ $ORDERER_GENESIS_ORDERERTYPE == 'kafka' ]; then
+      CONFIGTX_ORDERER_ORDERERTYPE=$OPTARG
+      export CONFIGTX_ORDERER_ORDERERTYPE=$CONFIGTX_ORDERER_ORDERERTYPE
+      echo "CONFIGTX_ORDERER_ORDERERTYPE: $CONFIGTX_ORDERER_ORDERERTYPE"
+      if [ $nBroker == 0 ] && [ $CONFIGTX_ORDERER_ORDERERTYPE == 'kafka' ]; then
           nBroker=1   # must have at least 1
       fi
       ;;
@@ -141,8 +147,8 @@ while getopts ":x:z:l:d:b:c:t:a:o:k:p:r:F:G:S:C:" opt; do
 done
 
 
-if [ $nBroker -gt 0 ] && [ $ORDERER_GENESIS_ORDERERTYPE == 'solo' ]; then
-    echo "reset Broker number to 0 due to the ORDERER_GENESIS_ORDERERTYPE=$ORDERER_GENESIS_ORDERERTYPE"
+if [ $nBroker -gt 0 ] && [ $CONFIGTX_ORDERER_ORDERERTYPE == 'solo' ]; then
+    echo "reset Broker number to 0 due to the CONFIGTX_ORDERER_ORDERERTYPE=$CONFIGTX_ORDERER_ORDERERTYPE"
     nBroker=0
 fi
 
@@ -208,37 +214,7 @@ do
 
 done
 
-for (( i=0; i<$nOrderer; i++ ))
-do
-    j=$[ i + 1 ]
-    Dir=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/$comName"/orderers/orderer1."$comName"/msp/keystore"
-    cd $Dir
-    tt=`ls *sk`
 
-    cd $CWD
-
-    sed '-i' "s/ORDERER_SK/$tt/g" docker-compose.yml
-
-done
-
-for (( i=0; i<$nOrg; i++ ))
-do
-    i1=$[ i + 1 ]
-    for (( j=0; j<$nPeerPerOrg; j++ ))
-    do
-        Dir=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org$i1"."$comName"/peers/peer"$j".org"$i1"."$comName"/msp/keystore"
-
-        cd $Dir
-        tt=`ls *sk`
-
-        cd $CWD
-
-        PEER_SK=ORG$i1"PEER_SK"$j
-        #echo "PEER_SK: $PEER_SK"
-        sed '-i' "s/$PEER_SK/$tt/g" docker-compose.yml
-
-    done
-done
 
 ## sed 's/-x86_64/TEST/g' docker-compose.yml > ss.yml
 ## cp ss.yml docker-compose.yml

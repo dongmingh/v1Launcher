@@ -1,8 +1,13 @@
 #!/bin/bash
 
 #
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+#
 # usage: ./gen_crypto_cfg.sh [opt] [value]
-# fabric coomit: f3c61e6cc3b04915081b15bbed000b377b53c4c1
 #
 
 function printHelp {

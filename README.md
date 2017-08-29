@@ -15,9 +15,9 @@ The usages of each script is given below so that they can be executed separately
 
 ##Code Base
 
-- fabric commit level: v1.0.0-beta
-- fabric-sdk-node commit level: v1.0.0-beta
-- fabric-ca commit level: v1.0.0-beta
+- fabric commit level: v1.0.0
+- fabric-sdk-node commit level: v1.0.0
+- fabric-ca commit level: v1.0.0
 
 
 #NetworkLauncher.sh
@@ -42,15 +42,17 @@ This is the main script to execute all tasks.
          -s: security type, default=256
          -t: ledger orderer service type [solo|kafka], default=solo
          -w: host ip 1, default=0.0.0.0
-         -F: local MSP base directory, default=/root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config
+         -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config
          -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config
          -S: TLS enablement [enabled|disabled], default=disabled
+         -C: company name, default=example.com
 
-    
+
 ##Example:
-    ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -k 1 -z 1 -n 2 -t kafka -f test -w 10.120.223.35 
+
+    ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -k 1 -z 1 -n 2 -t kafka -f test -w 10.120.223.35
     ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -n 1 -f test -w 10.120.223.35
-    ./NetworkLauncher.sh -o 4 -x 2 -r 2 -p 2 -k 4 -z 4 -n 2 -t kafka -f test -w 10.120.223.35 -S enabled
+    ./networkLauncher.sh -o 3 -x 6 -r 6 -p 2 -k 3 -z 3 -n 3 -t kafka -f test -w localhost -S enabled
 
 The above command will invoke cryptogen, cfgtxgen, generate orderer block, channel transaction and launch network.
 
@@ -63,6 +65,7 @@ The executable is in $GOPATH/src/github.com/hyperledger/fabric/common/tools/cryp
     go build
 
 ##Usage
+
     ./cryptogen generate --output=<cryptogen dir> --config=<crypto config>
 
 
@@ -72,7 +75,8 @@ The executable is in $GOPATH/src/github.com/hyperledger/fabric/common/tools/cryp
 The script is used to create configtx.yml.
 
 ##Usage
-    ./gen_cfgtx_x.sh [opt] [value] 
+
+    ./gen_cfgtx_x.sh [opt] [value]
 
     options:
        -o: number of orderers, default=1
@@ -86,12 +90,14 @@ The script is used to create configtx.yml.
        -w: host ip 1, default=0.0.0.0
 
 
-##Example:"
+##Example:
+
     ./gen_cfgtx.sh -o 1 -k 1 -p 2 -r 6 -h SHA2 -s 256 -t kafka -b /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/ -w 10.120.223.35
 
 
 
 #configtx.yaml-in
+
 This is a sample of configtx.yaml to be used to generate the desired configtx.yml. The key words in the sample file are:
 
 + &ProfileString: the profile string
@@ -101,9 +107,11 @@ This is a sample of configtx.yaml to be used to generate the desired configtx.ym
 + OrdererType: used for the orderer service type
 
 #gen_network.sh
+
 The script is used to create a docker-compose.yml and launch the network with specified number of peers, orderers, orderer service type etc.
 
 ##Usage
+
     gen_network.sh [opt] [value]
 
     options:
@@ -124,10 +132,11 @@ The script is used to create a docker-compose.yml and launch the network with sp
        orderer environment variables
        -b: batch size [10|msgs in batch/block]
        -t: orderer type [solo|kafka]
-       -c: batch timeout [10s|max secs before send an unfilled batch]
+       -c: batch timeout [2s|max secs before send an unfilled batch]
 
 
 ##Example
+
     ./gen_network.sh -a create -z 2 -p 2 -r 2 -o 1 -k 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config
 
 

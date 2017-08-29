@@ -1,8 +1,13 @@
 #!/bin/bash
 
 #
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+#
 # usage: ./gen_configtx_cfg.sh [opt] [value]
-# fabric coomit: f3c61e6cc3b04915081b15bbed000b377b53c4c1
 #
 
 HostIP1="0.0.0.0"
@@ -27,7 +32,7 @@ function printHelp {
    echo "    -C: company name, default=example.com"
    echo " "
    echo "Example:"
-   echo " ./gen_configtx_cfg.sh -o 1 -k 1 -p 2 -r 2 -h SHA2 -s 256 -t kafka -b /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/ -w 10.120.223.35 -v 1 -v 3"
+   echo " ./gen_configtx_cfg.sh -o 1 -k 1 -p 2 -r 2 -h SHA2 -s 256 -t kafka -b $GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/ -w 10.120.223.35 -v 1 -v 3"
    exit
 }
 
@@ -54,7 +59,7 @@ function getIP {
            peerIP[$ip]=$t2
            peerPort[$ip]=$t3
        fi
-    
+
    done < input.txt
 
    for (( i=1; i <= ${#kafkaIP[@]}; i++ ))

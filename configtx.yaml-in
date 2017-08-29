@@ -1,4 +1,10 @@
 ---
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
 ################################################################################
 #
 #   Profile
@@ -85,6 +91,10 @@ Orderer: &OrdererDefaults
         # the serialized messages in a batch. A message larger than the preferred
         # max bytes will result in a batch larger than preferred max bytes.
         PreferredMaxBytes: 512 KB
+
+    # Max Channels is the maximum number of channels to allow on the ordering
+    # network. When set to 0, this implies no maximum number of channels
+    MaxChannels: 0
 
     Kafka:
         # Brokers: A list of Kafka brokers to which the orderer connects
