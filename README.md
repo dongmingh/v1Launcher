@@ -29,6 +29,7 @@ This is the main script to execute all tasks.
 
     ./NetworkLauncher.sh [opt] [value]
        options:
+         -a: nework action [up|down], default=up
          -x: number of CAs
          -d: ledger database type, default=goleveldb
          -f: profile string, default=test
@@ -47,11 +48,19 @@ This is the main script to execute all tasks.
          -S: TLS enablement [enabled|disabled], default=disabled
          -C: company name, default=example.com
 
+Note that when `-a down` is invoked to clean network, the company name is used as a key word in searching for docker images to be deleted.  The company name can be set using `-C`. The default company name is `example.com`.
 
 ##Example:
 
+The following commands will clean a network with containers and docker images:
+
+    ./networkLauncher.sh -a down -C example.com
+    ./networkLauncher.sh -a down
+
+The following commands will generate a network:
+
     ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -k 1 -z 1 -n 2 -t kafka -f test -w 10.120.223.35
-    ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -n 1 -f test -w 10.120.223.35
+    ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -n 1 -f test -w localhost
     ./networkLauncher.sh -o 3 -x 6 -r 6 -p 2 -k 3 -z 3 -n 3 -t kafka -f test -w localhost -S enabled
 
 The above command will invoke cryptogen, cfgtxgen, generate orderer block, channel transaction and launch network.

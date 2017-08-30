@@ -16,7 +16,7 @@ function printHelp {
 
    echo "Usage: "
    echo " ./networkLauncher.sh [opt] [value] "
-   echo "    -a: nework action [up]down], default=up"
+   echo "    -a: nework action [up|down], default=up"
    echo "    -x: number of ca, default=0"
    echo "    -d: ledger database type, default=goleveldb"
    echo "    -f: profile string, default=test"
@@ -60,6 +60,7 @@ CryptoBaseDir=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen
 nChannel=1
 HostIP1="0.0.0.0"
 comName="example.com"
+netwrokAction="up"
 
 
 while getopts ":a:z:x:d:f:h:k:n:o:p:r:t:s:w:F:G:S:C:" opt; do
@@ -67,16 +68,8 @@ while getopts ":a:z:x:d:f:h:k:n:o:p:r:t:s:w:F:G:S:C:" opt; do
     # peer environment options
     a)
       tt=$OPTARG
-      action=$(echo $tt | awk '{print tolower($tt)}')
-      echo "network action: $action"
-      if [ $action == "down" ]; then
-          ./clearNetwork.sh
-          exit;
-      elif [ $action != "up" ]; then
-          echo "invalid network action option: $action"
-          printHelp
-          exit;
-      fi
+      netwrokAction=$(echo $tt | awk '{print tolower($tt)}')
+      echo "network action: $netwrokAction"
       ;;
     x)
       nCA=$OPTARG
@@ -179,6 +172,16 @@ while getopts ":a:z:x:d:f:h:k:n:o:p:r:t:s:w:F:G:S:C:" opt; do
 
   esac
 done
+
+#first handle network action: up|down
+      if [ $netwrokAction == "down" ]; then
+          ./cleanNetwork.sh $comName
+          exit;
+      elif [ $netwrokAction != "up" ]; then
+          echo "invalid network action option: $netwrokAction"
+          printHelp
+          exit;
+      fi
 
 #if [ $nCA -eq 0 ]; then
 #   nCA=$nOrg
