@@ -20,16 +20,16 @@ The usages of each script is given below so that they can be executed separately
 - fabric-ca commit level: v1.0.0
 
 
-# NetworkLauncher.sh
+# networkLauncher.sh
 
 This is the main script to execute all tasks.
 
 
 ## Usage:
 
-    ./NetworkLauncher.sh [opt] [value]
+    ./networkLauncher.sh [opt] [value]
        options:
-         -a: nework action [up|down], default=up
+         -a: network action [up|down], default=up
          -x: number of CAs
          -d: ledger database type, default=goleveldb
          -f: profile string, default=test
@@ -92,13 +92,13 @@ The executable is in $GOPATH/src/github.com/hyperledger/fabric/common/tools/cryp
     ./cryptogen generate --output=<cryptogen dir> --config=<crypto config>
 
 
-# gen\_cfgtx_x.sh
+# gen\_configtx_cfg.sh
 
-The script is used to create configtx.yml.
+The script is used to create configtx.yaml.
 
 ## Usage
 
-    ./gen_cfgtx_x.sh [opt] [value]
+    ./gen_configtx_cfg.sh [opt] [value]
 
     options:
        -o: number of orderers, default=1
@@ -114,13 +114,13 @@ The script is used to create configtx.yml.
 
 ## Example:
 
-    ./gen_cfgtx.sh -o 1 -k 1 -p 2 -r 6 -h SHA2 -s 256 -t kafka -b /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/ -w 10.120.223.35
+    ./gen_configtx_cfg.sh -o 1 -k 1 -p 2 -r 6 -h SHA2 -s 256 -t kafka -b /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/ -w 10.120.223.35
 
 
 
 # configtx.yaml-in
 
-This is a sample of configtx.yaml to be used to generate the desired configtx.yml. The key words in the sample file are:
+This is a sample of configtx.yaml to be used to generate the desired configtx.yaml. The key words in the sample file are:
 
 + &ProfileString: the profile string
 + *Org0: used by the script to list all organizations

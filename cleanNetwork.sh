@@ -11,9 +11,17 @@
 # example: ./cleanNetwork.sh sample
 #
 
-if [ $# -ne 1 ]; then
-    echo "invalid argument number: $#"
+function printHelp {
+    echo ""
+    echo "usage: ./cleanNetwork.sh [docker image key word]"
+    echo "example: ./cleanNetwork.sh sample"
+    echo ""
     exit
+}
+
+if [ $# -ne 1 ]; then
+    echo "invalid number of arguments: $#"
+    printHelp
 fi
 
 keyWord=$1

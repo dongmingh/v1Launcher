@@ -8,15 +8,14 @@
 
 # default directories
 FabricDir="$GOPATH/src/github.com/hyperledger/fabric"
-ordererDir="$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations"
-MSPDir="$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config"
+MSPDir="$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen"
 SRCMSPDir="/opt/hyperledger/fabric/msp/crypto-config"
 
 function printHelp {
 
    echo "Usage: "
    echo " ./networkLauncher.sh [opt] [value] "
-   echo "    -a: nework action [up|down], default=up"
+   echo "    -a: network action [up|down], default=up"
    echo "    -x: number of ca, default=0"
    echo "    -d: ledger database type, default=goleveldb"
    echo "    -f: profile string, default=test"
@@ -30,7 +29,7 @@ function printHelp {
    echo "    -s: security type, default=256"
    echo "    -t: ledger orderer service type [solo|kafka], default=solo"
    echo "    -w: host ip, default=0.0.0.0"
-   echo "    -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config"
+   echo "    -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/"
    echo "    -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config"
    echo "    -S: TLS enablement [enabled|disabled], default=disabled"
    echo "    -C: company name, default=example.com "
@@ -60,16 +59,16 @@ CryptoBaseDir=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen
 nChannel=1
 HostIP1="0.0.0.0"
 comName="example.com"
-netwrokAction="up"
-
+networkAction="up"
+BuildDir=$GOPATH/src/github.com/hyperledger/fabric/build/bin
 
 while getopts ":a:z:x:d:f:h:k:n:o:p:r:t:s:w:F:G:S:C:" opt; do
   case $opt in
     # peer environment options
     a)
       tt=$OPTARG
-      netwrokAction=$(echo $tt | awk '{print tolower($tt)}')
-      echo "network action: $netwrokAction"
+      networkAction=$(echo $tt | awk '{print tolower($tt)}')
+      echo "network action: $networkAction"
       ;;
     x)
       nCA=$OPTARG
@@ -174,14 +173,14 @@ while getopts ":a:z:x:d:f:h:k:n:o:p:r:t:s:w:F:G:S:C:" opt; do
 done
 
 #first handle network action: up|down
-      if [ $netwrokAction == "down" ]; then
-          ./cleanNetwork.sh $comName
-          exit;
-      elif [ $netwrokAction != "up" ]; then
-          echo "invalid network action option: $netwrokAction"
-          printHelp
-          exit;
-      fi
+if [ $networkAction == "down" ]; then
+    ./cleanNetwork.sh $comName
+    exit;
+elif [ $networkAction != "up" ]; then
+    echo "invalid network action option: $networkAction"
+    printHelp
+    exit;
+fi
 
 #if [ $nCA -eq 0 ]; then
 #   nCA=$nOrg
@@ -213,7 +212,7 @@ echo "        ####################################################### "
 echo "        #                execute cryptogen                    # "
 echo "        ####################################################### "
 echo "generate crypto ..."
-CRYPTOEXE=$CryptoBaseDir/cryptogen
+CRYPTOEXE=$BuildDir/cryptogen
 CRYPTOCFG=$CWD/crypto-config.yaml
 cd $CryptoBaseDir
 # remove existing crypto-config
@@ -221,13 +220,14 @@ rm -rf crypto-config
 echo "current working directory: $PWD"
 if [ ! -f $CRYPTOEXE ]; then
 echo "build $CRYPTOEXE "
-    go build
+    cd $FabricDir
+    make cryptogen
 fi
 cd $CWD
 echo "current working directory: $PWD"
 
-echo "$CRYPTOEXE generate --output=$CryptoBaseDir/crypto-config --config=$CRYPTOCFG"
-$CRYPTOEXE generate --output=$CryptoBaseDir/crypto-config --config=$CRYPTOCFG
+echo "$CRYPTOEXE generate --output=$MSPDir/crypto-config --config=$CRYPTOCFG"
+$CRYPTOEXE generate --output=$MSPDir/crypto-config --config=$CRYPTOCFG
 
 echo " "
 echo "        ####################################################### "
@@ -238,16 +238,16 @@ echo "generate configtx.yaml ..."
 cd $CWD
 echo "current working directory: $PWD"
 
-echo "./gen_configtx_cfg.sh -o $nOrderer -k $nKafka -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $PROFILE_STRING -w $HostIP1 -C $comName"
-./gen_configtx_cfg.sh -o $nOrderer -k $nKafka -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $PROFILE_STRING -w $HostIP1 -C $comName
+echo "./gen_configtx_cfg.sh -o $nOrderer -k $nKafka -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $PROFILE_STRING -w $HostIP1 -C $comName -b $MSPDir/crypto-config"
+./gen_configtx_cfg.sh -o $nOrderer -k $nKafka -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $PROFILE_STRING -w $HostIP1 -C $comName -b $MSPDir/crypto-config
 
 echo " "
 echo "        ####################################################### "
 echo "        #         create orderer genesis block                # "
 echo "        ####################################################### "
 echo " "
-CFGGenDir=$GOPATH/src/github.com/hyperledger/fabric/build/bin
-CFGEXE=$CFGGenDir"/configtxgen"
+CFGEXE=$BuildDir/configtxgen
+ordererDir=$MSPDir/crypto-config/ordererOrganizations
 #cp configtx.yaml $FabricDir"/common/configtx/tool"
 #cd $CFGGenDir
 if [ ! -f $CFGEXE ]; then
@@ -257,7 +257,7 @@ fi
 #create orderer blocks
 cd $CWD
 echo "current working directory: $PWD"
-ordBlock=$ordererDir"/orderer.block"
+ordBlock=$ordererDir/orderer.block
 echo "$CFGEXE -profile $ORDERER_PROFILE -outputBlock $ordBlock"
 $CFGEXE -profile $ORDERER_PROFILE -outputBlock $ordBlock
 
