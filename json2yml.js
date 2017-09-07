@@ -85,6 +85,12 @@ if ( process.env.CONFIGTX_ORDERER_BATCHTIMEOUT != null ) {
 console.log('ord_env_name: ', ord_env_name.length, ord_env_name);
 console.log('ord_env_val: ', ord_env_val.length, ord_env_val);
 
+if ( process.env.HOSTCONFIG_NETWORKMODE != null ) {
+    console.log(' HOSTCONFIG_NETWORKMODE= ', process.env.HOSTCONFIG_NETWORKMODE);
+    HOSTCONFIG_NETWORKMODE=process.env.HOSTCONFIG_NETWORKMODE;
+}
+console.log('HOSTCONFIG_NETWORKMODE: ', HOSTCONFIG_NETWORKMODE);
+
 // Peer environment var
 var peer_env_name=[];
 var peer_env_val=[];
@@ -445,7 +451,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                 fs.appendFileSync(dFile, buff);
 
                             }
-                                buff = '  ' + '    - ' + srcMSPDir + ':' + MSPDir + '\n';
+                                buff = '  ' + '    - ' + srcMSPDir+'/crypto-config' + ':' + MSPDir + '\n';
                                 fs.appendFileSync(dFile, buff);
 
                             if ( TLS.toUpperCase() == 'ENABLED' ) {
@@ -694,6 +700,9 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                     } else if ( lvl3_key[m] == 'CORE_PEER_ADDRESS' ) {
                                         buff = '  ' + '    - ' + lvl3_key[m] + '=' + vp0Addr +':'+ tmp_port + '\n';
                                         fs.appendFileSync(dFile, buff);
+                                    } else if ( lvl3_key[m] == 'CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE' ) {
+                                        buff = '  ' + '    - ' + lvl3_key[m] + '=' + HOSTCONFIG_NETWORKMODE +'_default' + '\n';
+                                        fs.appendFileSync(dFile, buff);
                                     } else if ( lvl3_key[m] == 'CORE_PEER_GOSSIP_BOOTSTRAP' ) {
                                         if ( v != 0 ) {
                                             buff = '  ' + '    - ' + lvl3_key[m] + '=' + peer0Name +':'+ '7051' + '\n';
@@ -825,7 +834,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                 fs.appendFileSync(dFile, buff);
 
                             }
-                                buff = '  ' + '    - ' + srcMSPDir+':'+ MSPDir + '\n';
+                                buff = '  ' + '    - ' + srcMSPDir+'/crypto-config'+':'+ MSPDir + '\n';
                                 fs.appendFileSync(dFile, buff);
 
                             //    if ( TLS.toUpperCase() == 'ENABLED' ) {
@@ -946,7 +955,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                             fs.appendFileSync(dFile, buff);
 
                         }
-                            buff = '  ' + '    - ' + srcMSPDir+':'+ MSPDir + '\n';
+                            buff = '  ' + '    - ' + srcMSPDir+'/crypto-config'+':'+ MSPDir + '\n';
                             fs.appendFileSync(dFile, buff);
 
                     } else {
@@ -1037,7 +1046,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                 // header 4
                                 var t0 = v+1;
                                 var t1 = 'org'+t0+'.'+comName;
-                                var tmp = srcMSPDir+'/peerOrganizations/'+t1+'/ca/:/etc/hyperledger/fabric-ca-server-config';
+                                var tmp = srcMSPDir+'crypto-config/'+'/peerOrganizations/'+t1+'/ca/:/etc/hyperledger/fabric-ca-server-config';
                                 buff = '  ' + '    - ' + tmp + '\n';
                                 //buff = '  ' + '    - ' +lvl2_obj[m] + '\n';
                                 fs.appendFileSync(dFile, buff);
